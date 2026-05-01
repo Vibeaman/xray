@@ -3,8 +3,7 @@ import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { 
   ArrowLeft, Wallet, Coins, Activity, Clock, Image,
-  Flame, Share2, Download, ExternalLink, Loader2, 
-  AlertCircle, RefreshCw
+  Flame, Share2, Download, ExternalLink, Loader2, AlertCircle, RefreshCw
 } from 'lucide-react'
 import { API_URL, CHAINS } from '../config'
 
@@ -12,6 +11,7 @@ export default function WalletResults() {
   const { address } = useParams()
   const [searchParams] = useSearchParams()
   const chain = searchParams.get('chain')
+  const includeRoast = searchParams.get('roast') !== 'false'
   
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -26,7 +26,7 @@ export default function WalletResults() {
     setError('')
     
     try {
-      const chainParam = chain ? `?chain=${chain}&roast=true` : '?roast=true'
+      const chainParam = chain ? `?chain=${chain}&roast=${includeRoast}` : `?roast=${includeRoast}`
       const response = await fetch(`${API_URL}/api/wallet/${address}${chainParam}`)
       const result = await response.json()
       
@@ -36,7 +36,7 @@ export default function WalletResults() {
         setData(result)
       }
     } catch (err) {
-      setError('Failed to analyze wallet. Please try again.')
+      setError('Failed to scan wallet.')
     } finally {
       setLoading(false)
     }
@@ -44,11 +44,11 @@ export default function WalletResults() {
 
   if (loading) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center">
+      <div className="min-h-[85vh] flex items-center justify-center">
         <motion.div className="text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <Loader2 className="w-12 h-12 text-cyan-500 animate-spin mx-auto mb-4" />
-          <p className="opacity-70">Scanning wallet...</p>
-          <p className="text-sm opacity-50 mt-2 font-mono">{address.slice(0, 8)}...{address.slice(-6)}</p>
+          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 opacity-60" />
+          <p className="opacity-60">Scanning wallet...</p>
+          <p className="text-sm opacity-40 mt-1 font-mono">{address.slice(0, 8)}...{address.slice(-6)}</p>
         </motion.div>
       </div>
     )
@@ -56,20 +56,20 @@ export default function WalletResults() {
 
   if (error) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center px-6">
-        <motion.div className="text-center glass-card p-8 max-w-md" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-          <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2 font-['Orbitron']">FAILED</h2>
-          <p className="opacity-70 mb-6">{error}</p>
+      <div className="min-h-[85vh] flex items-center justify-center px-6">
+        <motion.div className="text-center solid-card p-8 max-w-md" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+          <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-60" />
+          <h2 className="text-2xl font-bold font-display mb-2">Failed</h2>
+          <p className="opacity-60 mb-6">{error}</p>
           <div className="flex gap-4 justify-center">
             <Link to="/wallet">
-              <motion.button className="btn-outline px-6 py-3 flex items-center gap-2" whileHover={{ scale: 1.05 }}>
-                <ArrowLeft size={18} /> Go Back
-              </motion.button>
+              <button className="btn-secondary px-6 py-3 flex items-center gap-2">
+                <ArrowLeft size={18} /> Back
+              </button>
             </Link>
-            <motion.button onClick={fetchAnalysis} className="btn-neon px-6 py-3 flex items-center gap-2" whileHover={{ scale: 1.05 }}>
+            <button onClick={fetchAnalysis} className="btn-primary px-6 py-3 flex items-center gap-2">
               <RefreshCw size={18} /> Retry
-            </motion.button>
+            </button>
           </div>
         </motion.div>
       </div>
@@ -80,50 +80,56 @@ export default function WalletResults() {
   const chainInfo = CHAINS[data.chain] || { name: data.chain, symbol: '?', color: '#888' }
 
   return (
-    <div className="px-6 py-12">
-      <div className="max-w-6xl mx-auto">
+    <div className="px-6 py-8">
+      <div className="max-w-5xl mx-auto">
+        {/* Back */}
         <Link to="/wallet">
-          <motion.button className="flex items-center gap-2 opacity-70 hover:opacity-100 mb-8 transition-all" whileHover={{ x: -5 }}>
-            <ArrowLeft size={20} /> Scan another
+          <motion.button className="flex items-center gap-2 opacity-60 hover:opacity-100 mb-8" whileHover={{ x: -5 }}>
+            <ArrowLeft size={20} /> Back
           </motion.button>
         </Link>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6">
           {/* Wallet Card */}
-          <motion.div className="lg:col-span-1" initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }}>
-            <div className="glass-card p-6 retro-card">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="lg:col-span-1"
+          >
+            <div className="solid-card p-6 text-center">
               {/* Chain & Tier */}
               <div className="flex items-center justify-between mb-6">
-                <div className="px-3 py-1 rounded-lg text-sm font-medium" style={{ backgroundColor: `${chainInfo.color}20`, color: chainInfo.color }}>
+                <div 
+                  className="px-3 py-1 rounded-lg text-sm font-medium"
+                  style={{ backgroundColor: `${chainInfo.color}20`, color: chainInfo.color }}
+                >
                   {chainInfo.name}
                 </div>
-                <div className={`tier-badge ${tierColors[data.tier]}`}>
+                <div className={`tier-badge text-sm ${tierColors[data.tier]}`}>
                   {data.tier}
                 </div>
               </div>
 
               {/* Icon */}
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center mx-auto mb-6">
-                <Wallet size={36} className="text-cyan-400" />
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-400/20 to-red-400/20 flex items-center justify-center mx-auto mb-4">
+                <Wallet size={36} className="opacity-70" />
               </div>
 
               {/* Address */}
-              <div className="text-center mb-6">
-                <p className="text-xs opacity-50 mb-1">Address</p>
-                <a
-                  href={`https://solscan.io/account/${address}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-mono text-sm text-cyan-400 hover:text-cyan-300 transition-all flex items-center justify-center gap-1"
-                >
-                  {address.slice(0, 8)}...{address.slice(-8)}
-                  <ExternalLink size={12} />
-                </a>
-              </div>
+              <p className="text-xs opacity-40 mb-1">Address</p>
+              <a
+                href={`https://solscan.io/account/${address}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-sm opacity-70 hover:opacity-100 flex items-center justify-center gap-1"
+              >
+                {address.slice(0, 8)}...{address.slice(-8)}
+                <ExternalLink size={12} />
+              </a>
 
               {/* Balance */}
-              <div className="glass-card p-4 text-center mb-6">
-                <p className="text-2xl font-bold neon-text font-['Orbitron']">
+              <div className="bg-white/10 dark:bg-white/5 rounded-xl p-4 mt-6">
+                <p className="text-2xl font-bold font-display">
                   ${data.balance.usd?.toFixed(2) || '0.00'}
                 </p>
                 <p className="text-sm opacity-50">
@@ -132,60 +138,58 @@ export default function WalletResults() {
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="glass-card p-3 text-center">
-                  <Activity size={16} className="mx-auto mb-1 text-pink-400" />
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                <div className="bg-white/10 dark:bg-white/5 rounded-xl p-3">
+                  <Activity size={16} className="mx-auto mb-1 opacity-60" />
                   <div className="text-lg font-bold">{data.transactions?.total || 0}</div>
-                  <div className="text-xs opacity-50">Txns</div>
+                  <div className="text-xs opacity-40">Txns</div>
                 </div>
-                <div className="glass-card p-3 text-center">
-                  <Clock size={16} className="mx-auto mb-1 text-cyan-400" />
+                <div className="bg-white/10 dark:bg-white/5 rounded-xl p-3">
+                  <Clock size={16} className="mx-auto mb-1 opacity-60" />
                   <div className="text-lg font-bold">{data.walletAge?.formatted || 'New'}</div>
-                  <div className="text-xs opacity-50">Age</div>
+                  <div className="text-xs opacity-40">Age</div>
                 </div>
-                <div className="glass-card p-3 text-center">
-                  <Coins size={16} className="mx-auto mb-1 text-purple-400" />
+                <div className="bg-white/10 dark:bg-white/5 rounded-xl p-3">
+                  <Coins size={16} className="mx-auto mb-1 opacity-60" />
                   <div className="text-lg font-bold">{data.tokens?.count || 0}</div>
-                  <div className="text-xs opacity-50">Tokens</div>
+                  <div className="text-xs opacity-40">Tokens</div>
                 </div>
-                <div className="glass-card p-3 text-center">
-                  <Image size={16} className="mx-auto mb-1 text-orange-400" />
+                <div className="bg-white/10 dark:bg-white/5 rounded-xl p-3">
+                  <Image size={16} className="mx-auto mb-1 opacity-60" />
                   <div className="text-lg font-bold">{data.nfts?.count || 0}</div>
-                  <div className="text-xs opacity-50">NFTs</div>
+                  <div className="text-xs opacity-40">NFTs</div>
                 </div>
               </div>
             </div>
           </motion.div>
 
-          {/* Scores & Roast */}
-          <motion.div className="lg:col-span-2 space-y-6" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+          {/* Right Column */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="lg:col-span-2 space-y-6"
+          >
             {/* Score */}
-            <div className="glass-card p-6">
-              <h3 className="text-lg font-semibold mb-6 font-['Orbitron'] neon-text">WALLET SCORE</h3>
-              
+            <div className="solid-card p-6">
+              <h3 className="font-bold font-display mb-6">Wallet Score</h3>
               <div className="flex items-center gap-8">
-                <div className="relative w-28 h-28">
-                  <svg className="w-28 h-28 -rotate-90">
-                    <circle cx="56" cy="56" r="48" stroke="currentColor" strokeWidth="8" fill="none" className="opacity-10" />
+                <div className="relative w-24 h-24 score-circle">
+                  <svg className="w-24 h-24 -rotate-90">
+                    <circle cx="48" cy="48" r="40" strokeWidth="8" fill="none" className="stroke-current opacity-10" />
                     <circle
-                      cx="56" cy="56" r="48"
-                      stroke="url(#walletGrad)"
+                      cx="48" cy="48" r="40"
                       strokeWidth="8"
                       fill="none"
                       strokeLinecap="round"
-                      strokeDasharray="302"
-                      strokeDashoffset={302 - (302 * (data.overallScore || 0)) / 100}
-                      className="transition-all duration-1000"
+                      strokeDasharray="251"
+                      strokeDashoffset={251 - (251 * (data.overallScore || 0)) / 100}
+                      className="stroke-current transition-all duration-1000"
+                      style={{ stroke: '#ff6b6b' }}
                     />
-                    <defs>
-                      <linearGradient id="walletGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#06b6d4" />
-                        <stop offset="100%" stopColor="#8b5cf6" />
-                      </linearGradient>
-                    </defs>
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-2xl font-bold font-['Orbitron']">{data.overallScore || 0}</span>
+                    <span className="text-2xl font-bold font-display">{data.overallScore || 0}</span>
                   </div>
                 </div>
 
@@ -193,15 +197,15 @@ export default function WalletResults() {
                   {data.scores && Object.entries(data.scores).map(([key, value]) => (
                     <div key={key}>
                       <div className="flex justify-between text-sm mb-1">
-                        <span className="capitalize opacity-70">{key}</span>
+                        <span className="capitalize opacity-60">{key}</span>
                         <span className="font-medium">{value}</span>
                       </div>
-                      <div className="h-2 rounded-full overflow-hidden bg-white/10">
+                      <div className="h-2 rounded-full overflow-hidden bg-black/10 dark:bg-white/10">
                         <motion.div
-                          className="h-full bg-gradient-to-r from-cyan-500 to-purple-500"
+                          className="h-full rounded-full bg-gradient-to-r from-orange-400 to-red-400"
                           initial={{ width: 0 }}
                           animate={{ width: `${value}%` }}
-                          transition={{ duration: 1, delay: 0.5 }}
+                          transition={{ duration: 0.8, delay: 0.3 }}
                         />
                       </div>
                     </div>
@@ -213,25 +217,25 @@ export default function WalletResults() {
             {/* Roast */}
             {data.roast && (
               <motion.div
-                className="glass-card p-6 border-2 border-orange-500/30"
+                className="solid-card p-6 border-l-4 border-orange-500"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0.3 }}
               >
-                <div className="flex items-center gap-2 mb-4">
-                  <Flame className="text-orange-500" size={24} />
-                  <h3 className="text-lg font-semibold font-['Orbitron'] text-orange-400">THE ROAST</h3>
+                <div className="flex items-center gap-2 mb-3">
+                  <Flame size={20} className="text-orange-500" />
+                  <h3 className="font-bold font-display">The Roast</h3>
                 </div>
-                <p className="text-lg leading-relaxed italic opacity-90">"{data.roast}"</p>
+                <p className="text-lg leading-relaxed italic opacity-80">"{data.roast}"</p>
               </motion.div>
             )}
 
             {/* Actions */}
             <div className="flex gap-4">
-              <motion.button className="flex-1 btn-outline py-3 flex items-center justify-center gap-2" whileHover={{ scale: 1.02 }}>
+              <motion.button className="flex-1 btn-secondary py-3 flex items-center justify-center gap-2" whileHover={{ scale: 1.02 }}>
                 <Share2 size={18} /> Share
               </motion.button>
-              <motion.button className="flex-1 btn-neon py-3 flex items-center justify-center gap-2" whileHover={{ scale: 1.02 }}>
+              <motion.button className="flex-1 btn-primary py-3 flex items-center justify-center gap-2" whileHover={{ scale: 1.02 }}>
                 <Download size={18} /> Download
               </motion.button>
             </div>

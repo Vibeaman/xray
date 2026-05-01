@@ -1,24 +1,21 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Wallet as WalletIcon, Loader2, AlertCircle, Link as LinkIcon } from 'lucide-react'
+import { Wallet as WalletIcon, Loader2, Link as LinkIcon, Flame } from 'lucide-react'
 import { CHAINS } from '../config'
 
 export default function Wallet() {
   const [address, setAddress] = useState('')
   const [chain, setChain] = useState('auto')
+  const [includeRoast, setIncludeRoast] = useState(true)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     if (!address.trim()) return
 
-    setLoading(true)
-    setError('')
-
-    const chainParam = chain !== 'auto' ? `?chain=${chain}` : ''
+    const chainParam = chain !== 'auto' ? `?chain=${chain}&roast=${includeRoast}` : `?roast=${includeRoast}`
     navigate(`/wallet/${address.trim()}${chainParam}`)
   }
 
@@ -26,67 +23,67 @@ export default function Wallet() {
   const isSolanaAddress = (addr) => /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(addr)
 
   const detectChain = () => {
-    if (isEVMAddress(address)) return 'EVM (Ethereum/BSC/Base...)'
+    if (isEVMAddress(address)) return 'EVM'
     if (isSolanaAddress(address)) return 'Solana'
-    return 'Unknown'
+    return null
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-6 py-12">
-      <div className="max-w-xl w-full">
+    <div className="min-h-[85vh] flex items-center justify-center px-6">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-lg"
+      >
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-10"
-        >
+        <div className="text-center mb-10">
           <motion.div
-            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 mb-6"
-            animate={{ y: [0, -10, 0] }}
+            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 dark:bg-white/10 mb-6 shadow-lg"
+            animate={{ y: [0, -8, 0] }}
             transition={{ duration: 3, repeat: Infinity }}
           >
-            <WalletIcon className="text-cyan-400" size={36} />
+            <WalletIcon size={36} className="opacity-80" />
           </motion.div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 font-['Orbitron']">
-            <span className="neon-text">SCAN WALLET</span>
+          <h1 className="text-4xl md:text-5xl font-bold font-display mb-3">
+            Scan Wallet
           </h1>
-          <p className="text-lg opacity-70">
-            Analyze holdings across multiple chains
+          <p className="text-lg opacity-60">
+            Analyze any wallet across chains
           </p>
-        </motion.div>
+        </div>
 
         {/* Form */}
         <motion.form
           onSubmit={handleSubmit}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
+          className="solid-card p-8"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="glass-card p-8"
         >
           {/* Input */}
-          <div className="relative mb-6">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none">
-              <LinkIcon className="text-cyan-400" size={20} />
+          <div className="relative mb-4">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+              <LinkIcon size={20} className="opacity-40" />
             </div>
             <input
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="Enter wallet address (0x... or Solana)"
-              className="w-full input-neon py-4 pl-14 pr-4 text-lg font-mono"
+              placeholder="0x... or Solana address"
+              className="input-field pl-12 text-lg font-mono"
               disabled={loading}
             />
           </div>
 
           {/* Detected */}
-          {address.length > 10 && (
+          {address.length > 10 && detectChain() && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mb-6 text-sm"
+              className="mb-4 text-sm"
             >
               <span className="opacity-50">Detected: </span>
-              <span className="text-cyan-400">{detectChain()}</span>
+              <span className="font-medium">{detectChain()}</span>
             </motion.div>
           )}
 
@@ -97,15 +94,15 @@ export default function Wallet() {
               animate={{ opacity: 1, height: 'auto' }}
               className="mb-6"
             >
-              <label className="block text-sm opacity-70 mb-2">Select Chain</label>
+              <label className="block text-sm opacity-60 mb-2">Select Chain</label>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setChain('auto')}
                   className={`p-3 rounded-xl text-sm font-medium transition-all ${
                     chain === 'auto' 
-                      ? 'bg-pink-500/20 text-pink-400 ring-1 ring-pink-500' 
-                      : 'glass-card hover:bg-white/5'
+                      ? 'bg-gradient-to-r from-orange-400 to-red-400 text-white' 
+                      : 'bg-white/10 hover:bg-white/20'
                   }`}
                 >
                   Auto
@@ -117,8 +114,8 @@ export default function Wallet() {
                     onClick={() => setChain(key)}
                     className={`p-3 rounded-xl text-sm font-medium transition-all ${
                       chain === key 
-                        ? 'bg-pink-500/20 text-pink-400 ring-1 ring-pink-500' 
-                        : 'glass-card hover:bg-white/5'
+                        ? 'bg-gradient-to-r from-orange-400 to-red-400 text-white' 
+                        : 'bg-white/10 hover:bg-white/20'
                     }`}
                   >
                     {value.name}
@@ -128,61 +125,54 @@ export default function Wallet() {
             </motion.div>
           )}
 
-          {/* Error */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 text-red-400 mb-4"
-            >
-              <AlertCircle size={18} />
-              <span>{error}</span>
-            </motion.div>
-          )}
+          {/* Options */}
+          <div className="mb-6">
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={includeRoast}
+                onChange={(e) => setIncludeRoast(e.target.checked)}
+                className="w-5 h-5 rounded border-2 border-current text-orange-500 focus:ring-orange-500"
+              />
+              <span className="flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
+                <Flame size={18} className="text-orange-500" />
+                Include Roast
+              </span>
+            </label>
+          </div>
 
           {/* Submit */}
           <motion.button
             type="submit"
-            className="w-full btn-neon py-4 text-lg flex items-center justify-center gap-2"
+            className="btn-primary w-full text-lg py-4 flex items-center justify-center gap-3"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             disabled={loading || !address.trim()}
           >
             {loading ? (
-              <>
-                <Loader2 className="animate-spin" size={20} />
-                Scanning...
-              </>
+              <Loader2 className="animate-spin" size={22} />
             ) : (
               <>
-                <WalletIcon size={20} />
-                Scan Wallet
+                <WalletIcon size={22} />
+                Scan
               </>
             )}
           </motion.button>
-
-          {/* Options */}
-          <div className="flex items-center justify-center gap-6 mt-6">
-            <label className="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-all">
-              <input type="checkbox" className="rounded border-purple-500 bg-transparent text-pink-500" defaultChecked />
-              <span className="text-sm">Include Roast</span>
-            </label>
-          </div>
         </motion.form>
 
-        {/* Supported Chains */}
+        {/* Supported */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
           className="mt-8 text-center"
         >
-          <p className="text-sm opacity-50 mb-3">Supported chains</p>
+          <p className="text-sm opacity-40 mb-3">Supported chains</p>
           <div className="flex flex-wrap justify-center gap-2">
             {Object.entries(CHAINS).map(([key, value]) => (
               <div
                 key={key}
-                className="px-3 py-1 glass-card text-xs flex items-center gap-2"
+                className="px-3 py-1 rounded-lg bg-white/10 text-xs flex items-center gap-2"
               >
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: value.color }} />
                 {value.name}
@@ -190,7 +180,7 @@ export default function Wallet() {
             ))}
           </div>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   )
 }

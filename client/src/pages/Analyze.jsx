@@ -1,148 +1,142 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Search, AtSign, Loader2, AlertCircle } from 'lucide-react'
+import { Search, AtSign, Loader2, Flame, Image } from 'lucide-react'
 
 export default function Analyze() {
   const [username, setUsername] = useState('')
+  const [includeRoast, setIncludeRoast] = useState(true)
+  const [ratePfp, setRatePfp] = useState(true)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     if (!username.trim()) return
 
-    setLoading(true)
-    setError('')
-
     const cleanUsername = username.trim().replace(/^@/, '')
-    navigate(`/results/${cleanUsername}`)
+    navigate(`/results/${cleanUsername}?roast=${includeRoast}&pfp=${ratePfp}`)
   }
 
-  const popularAccounts = [
-    { username: 'elonmusk', label: 'Elon' },
-    { username: 'naval', label: 'Naval' },
-    { username: 'VitalikButerin', label: 'Vitalik' },
-    { username: 'cobie', label: 'Cobie' },
-  ]
+  const suggestions = ['elonmusk', 'naval', 'VitalikButerin', 'cobie']
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-6 py-12">
-      <div className="max-w-xl w-full">
+    <div className="min-h-[85vh] flex items-center justify-center px-6">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-lg"
+      >
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-10"
-        >
+        <div className="text-center mb-10">
           <motion.div
-            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-pink-500/20 to-cyan-500/20 border border-pink-500/30 mb-6"
-            animate={{ rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 3, repeat: Infinity }}
+            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 dark:bg-white/10 mb-6 shadow-lg"
+            whileHover={{ rotate: 10 }}
           >
-            <Search className="text-cyan-400" size={36} />
+            <Search size={36} className="opacity-80" />
           </motion.div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 font-['Orbitron']">
-            <span className="neon-text">ANALYZE</span>
+          <h1 className="text-4xl md:text-5xl font-bold font-display mb-3">
+            Analyze
           </h1>
-          <p className="text-lg opacity-70">
-            Enter a Twitter/X username to get the full breakdown
+          <p className="text-lg opacity-60">
+            Enter a Twitter/X username
           </p>
-        </motion.div>
+        </div>
 
-        {/* Form */}
+        {/* Form Card */}
         <motion.form
           onSubmit={handleSubmit}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
+          className="solid-card p-8"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="glass-card p-8"
         >
           {/* Input */}
           <div className="relative mb-6">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none">
-              <AtSign className="text-purple-400" size={20} />
+            <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+              <AtSign size={20} className="opacity-40" />
             </div>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username..."
-              className="w-full input-neon py-4 pl-14 pr-4 text-lg"
+              placeholder="username"
+              className="input-field pl-12 text-lg"
               disabled={loading}
             />
           </div>
 
-          {/* Error */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 text-red-400 mb-4"
-            >
-              <AlertCircle size={18} />
-              <span>{error}</span>
-            </motion.div>
-          )}
+          {/* Options */}
+          <div className="flex flex-wrap gap-4 mb-6">
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={includeRoast}
+                onChange={(e) => setIncludeRoast(e.target.checked)}
+                className="w-5 h-5 rounded border-2 border-current text-orange-500 focus:ring-orange-500"
+              />
+              <span className="flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
+                <Flame size={18} className="text-orange-500" />
+                Include Roast
+              </span>
+            </label>
+            
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={ratePfp}
+                onChange={(e) => setRatePfp(e.target.checked)}
+                className="w-5 h-5 rounded border-2 border-current text-purple-500 focus:ring-purple-500"
+              />
+              <span className="flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
+                <Image size={18} className="text-purple-500" />
+                Rate PFP
+              </span>
+            </label>
+          </div>
 
           {/* Submit */}
           <motion.button
             type="submit"
-            className="w-full btn-neon py-4 text-lg flex items-center justify-center gap-2"
+            className="btn-primary w-full text-lg py-4 flex items-center justify-center gap-3"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             disabled={loading || !username.trim()}
           >
             {loading ? (
-              <>
-                <Loader2 className="animate-spin" size={20} />
-                Analyzing...
-              </>
+              <Loader2 className="animate-spin" size={22} />
             ) : (
               <>
-                <Search size={20} />
-                Analyze Profile
+                <Search size={22} />
+                Analyze
               </>
             )}
           </motion.button>
-
-          {/* Options */}
-          <div className="flex items-center justify-center gap-6 mt-6">
-            <label className="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-all">
-              <input type="checkbox" className="rounded border-purple-500 bg-transparent text-pink-500" defaultChecked />
-              <span className="text-sm">Include Roast</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-all">
-              <input type="checkbox" className="rounded border-purple-500 bg-transparent text-pink-500" defaultChecked />
-              <span className="text-sm">Rate PFP</span>
-            </label>
-          </div>
         </motion.form>
 
-        {/* Popular */}
+        {/* Suggestions */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
           className="mt-8 text-center"
         >
-          <p className="text-sm opacity-50 mb-3">Try these</p>
+          <p className="text-sm opacity-40 mb-3">Try these</p>
           <div className="flex flex-wrap justify-center gap-2">
-            {popularAccounts.map((account) => (
+            {suggestions.map((name) => (
               <motion.button
-                key={account.username}
-                onClick={() => setUsername(account.username)}
-                className="px-4 py-2 glass-card text-sm opacity-70 hover:opacity-100 transition-all"
+                key={name}
+                onClick={() => setUsername(name)}
+                className="px-4 py-2 rounded-lg bg-white/10 dark:bg-white/10 text-sm hover:bg-white/20 transition-all"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                @{account.username}
+                @{name}
               </motion.button>
             ))}
           </div>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   )
 }
