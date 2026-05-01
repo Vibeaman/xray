@@ -113,9 +113,18 @@ class TwitterService {
     try {
       const guestToken = await this.getGuestToken();
       
+      // GraphQL query IDs (Twitter rotates these, try multiple)
+      const queryIds = [
+        'V7H0Ap3_Hh2FyS75OCDO3Q',
+        'Tg82Ez_kxVaJf7OPbUdbCg', 
+        'H8OOoI-5ZE4NxgRr8lfyWg',
+        'eS7LO5Jy3xgmd3dbL044EA',
+        'XicnWRbyQ3WgVY__VataBQ'
+      ];
+      
       const variables = JSON.stringify({
         userId: userId,
-        count: maxResults,
+        count: 20,
         includePromotedContent: false,
         withQuickPromoteEligibilityTweetFields: false,
         withVoice: false,
@@ -148,49 +157,71 @@ class TwitterService {
         responsive_web_enhance_cards_enabled: false
       });
 
-      const url = `https://twitter.com/i/api/graphql/V7H0Ap3_Hh2FyS75OCDO3Q/UserTweets?variables=${encodeURIComponent(variables)}&features=${encodeURIComponent(features)}`;
+      // Try each query ID until one works
+      for (const queryId of queryIds) {
+        try {
+          const url = `https://twitter.com/i/api/graphql/${queryId}/UserTweets?variables=${encodeURIComponent(variables)}&features=${encodeURIComponent(features)}`;
+          
+          console.log(`Trying query ID: ${queryId}`);
+          
+          const response = await axios.get(url, {
+            headers: {
+              'Authorization': `Bearer ${this.bearerToken}`,
+              'x-guest-token': guestToken,
+              'x-twitter-active-user': 'yes',
+              'x-twitter-client-language': 'en',
+              'Content-Type': 'application/json'
+            },
+            timeout: 15000
+          });
 
-      const response = await axios.get(url, {
-        headers: {
-          'Authorization': `Bearer ${this.bearerToken}`,
-          'x-guest-token': guestToken,
-          'x-twitter-active-user': 'yes',
-          'x-twitter-client-language': 'en',
-          'Content-Type': 'application/json'
-        },
-        timeout: 15000
-      });
-
-      const timeline = response.data?.data?.user?.result?.timeline_v2?.timeline?.instructions || [];
-      const tweets = [];
-      let pinnedTweet = null;
-
-      for (const instruction of timeline) {
-        // Check for pinned tweet
-        if (instruction.type === 'TimelinePinEntry') {
-          const pinned = instruction.entry?.content?.itemContent?.tweet_results?.result;
-          if (pinned?.legacy) {
-            pinnedTweet = this.parseTweet(pinned);
+          const timeline = response.data?.data?.user?.result?.timeline_v2?.timeline?.instructions || [];
+          
+          if (timeline.length === 0) {
+            console.log(`Query ${queryId} returned empty timeline, trying next...`);
+            continue;
           }
-        }
-        
-        // Get regular tweets
-        if (instruction.type === 'TimelineAddEntries') {
-          for (const entry of instruction.entries || []) {
-            const tweet = entry?.content?.itemContent?.tweet_results?.result;
-            if (tweet?.legacy && tweets.length < maxResults) {
-              tweets.push(this.parseTweet(tweet));
+          
+          const tweets = [];
+          let pinnedTweet = null;
+
+          for (const instruction of timeline) {
+            // Check for pinned tweet
+            if (instruction.type === 'TimelinePinEntry') {
+              const pinned = instruction.entry?.content?.itemContent?.tweet_results?.result;
+              if (pinned?.legacy) {
+                pinnedTweet = this.parseTweet(pinned);
+                console.log('Found pinned tweet');
+              }
+            }
+            
+            // Get regular tweets
+            if (instruction.type === 'TimelineAddEntries') {
+              for (const entry of instruction.entries || []) {
+                const tweetContent = entry?.content?.itemContent?.tweet_results?.result;
+                if (tweetContent?.legacy && tweets.length < maxResults) {
+                  // Skip retweets for analysis purposes
+                  if (!tweetContent.legacy.retweeted_status_result) {
+                    tweets.push(this.parseTweet(tweetContent));
+                  }
+                }
+              }
             }
           }
+
+          console.log(`Got ${tweets.length} tweets, pinned: ${pinnedTweet ? 'yes' : 'no'}`);
+          
+          return { tweets, pinnedTweet };
+          
+        } catch (err) {
+          console.log(`Query ${queryId} failed: ${err.message}`);
+          continue;
         }
       }
-
-      console.log(`Got ${tweets.length} tweets, pinned: ${pinnedTweet ? 'yes' : 'no'}`);
       
-      return {
-        tweets,
-        pinnedTweet
-      };
+      // All query IDs failed
+      console.log('All GraphQL query IDs failed');
+      return { tweets: [], pinnedTweet: null };
 
     } catch (error) {
       console.error('Error fetching tweets:', error.message);
