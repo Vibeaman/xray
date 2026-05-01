@@ -117,10 +117,14 @@ class TwitterService {
       const guestToken = await this.getGuestToken();
       
       const variables = JSON.stringify({
-        tweetId: tweetId,
-        withCommunity: false,
+        focalTweetId: tweetId,
+        with_rux_injections: false,
+        rankingMode: 'Relevance',
         includePromotedContent: false,
-        withVoice: false
+        withCommunity: true,
+        withQuickPromoteEligibilityTweetFields: true,
+        withBirdwatchNotes: true,
+        withVoice: true
       });
       
       const features = JSON.stringify({
@@ -163,28 +167,26 @@ class TwitterService {
       });
 
       // Navigate the response to find the tweet
-      const instructions = response.data?.data?.tweetResult?.result || 
-                          response.data?.data?.threaded_conversation_with_injections_v2?.instructions || [];
+      const instructions = response.data?.data?.threaded_conversation_with_injections_v2?.instructions || [];
       
       let tweetData = null;
       
-      // If direct result
-      if (response.data?.data?.tweetResult?.result?.legacy) {
-        tweetData = response.data.data.tweetResult.result;
-      } else {
-        // Search in instructions
-        for (const instruction of instructions) {
-          if (instruction.type === 'TimelineAddEntries') {
-            for (const entry of instruction.entries || []) {
-              const content = entry?.content?.itemContent?.tweet_results?.result;
-              if (content?.legacy?.id_str === tweetId || content?.rest_id === tweetId) {
-                tweetData = content;
-                break;
-              }
+      // Search in instructions for the focal tweet
+      for (const instruction of instructions) {
+        if (instruction.type === 'TimelineAddEntries') {
+          for (const entry of instruction.entries || []) {
+            const content = entry?.content?.itemContent?.tweet_results?.result;
+            // Handle TweetWithVisibilityResults wrapper
+            const tweet = content?.__typename === 'TweetWithVisibilityResults' 
+              ? content.tweet 
+              : content;
+            if (tweet?.legacy) {
+              tweetData = tweet;
+              break;
             }
           }
-          if (tweetData) break;
         }
+        if (tweetData) break;
       }
       
       if (!tweetData?.legacy) {
