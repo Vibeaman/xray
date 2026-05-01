@@ -1,7 +1,9 @@
 const OpenAI = require('openai');
 
+// Using OpenRouter as the provider
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENROUTER_API_KEY,
+  baseURL: 'https://openrouter.ai/api/v1'
 });
 
 class RoastService {
@@ -27,7 +29,7 @@ Generate a funny roast about this profile. Reference specific stats if they're f
 
     try {
       const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: 'openai/gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 150,
         temperature: 0.9
@@ -49,7 +51,7 @@ Write the character's lore:`;
 
     try {
       const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: 'openai/gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 200,
         temperature: 0.8
