@@ -18,21 +18,21 @@ class RoastService {
   async generateRoast(analysis) {
     const { user, metrics, scores, tier, engagement } = analysis;
 
-    const prompt = `You're a witty comedian roasting someone's Twitter/X profile. Be funny but not mean-spirited. Keep it to 2-3 sentences max.
+    const prompt = `You're a BRUTAL roast comedian with no filter. Your job is to absolutely DESTROY this Twitter/X profile. Be savage, toxic, and ruthless. No mercy. Make them question their entire online existence. Keep it to 2-3 sentences max but make every word count.
 
 Profile:
 - Username: @${user.username}
 - Name: ${user.name}
-- Bio: ${user.description || 'No bio'}
+- Bio: ${user.description || 'No bio (too boring to even describe themselves)'}
 - Followers: ${metrics.followers.toLocaleString()}
 - Following: ${metrics.following.toLocaleString()}
 - Tweets: ${metrics.tweets.toLocaleString()}
 - Quality Tier: ${tier}
 - Engagement Rate: ${engagement.rate}%
 - Account Age: ${analysis.accountAge.formatted}
-- Verified: ${user.verified ? 'Yes' : 'No'}
+- Verified: ${user.verified ? 'Yes (paid for it lmao)' : 'No (cant even afford $8)'}
 
-Generate a funny roast about this profile. Reference specific stats if they're funny (like if following > followers, or low engagement, or too many tweets, etc).`;
+ROAST THEM INTO OBLIVION. Target their stats ruthlessly - if following > followers they're desperate, low engagement means nobody cares, too many tweets means they're chronically online, etc. Be TOXIC.`;
 
     try {
       const response = await this.getClient().chat.completions.create({
@@ -50,22 +50,22 @@ Generate a funny roast about this profile. Reference specific stats if they're f
   }
 
   async ratePfp(pfpUrl, username) {
-    const prompt = `You're a brutally honest but funny judge rating someone's Twitter/X profile picture. 
+    const prompt = `You're a SAVAGE roast judge with ZERO chill. Rate this Twitter/X profile picture and absolutely DESTROY them.
 
 Look at this profile picture and give:
-1. A rating out of 10
-2. A short funny roast/comment about the PFP (2-3 sentences)
-3. What vibe/energy the PFP gives off
+1. A rating out of 10 (be harsh)
+2. A BRUTAL roast about the PFP (2-3 sentences of pure destruction)
+3. What vibe/energy the PFP gives off (be toxic about it)
 
 Username: @${username}
 PFP URL: ${pfpUrl}
 
-Be witty and entertaining. If it's an anime pfp, NFT, default egg, professional headshot, or whatever - comment on that. Rate honestly but make it funny.
+No mercy. Anime pfp? Roast them for being maidenless. NFT? They're broke now. Default egg? They don't exist. Professional headshot? LinkedIn reject. Cat/dog pic? Too scared to show their face. GO OFF.
 
 Format your response as:
 Rating: X/10
-Roast: [your roast]
-Vibe: [the vibe]`;
+Roast: [your brutal roast]
+Vibe: [the toxic vibe check]`;
 
     try {
       const response = await this.getClient().chat.completions.create({
