@@ -8,6 +8,10 @@ class TwitterService {
 
   async getUser(username) {
     try {
+      console.log('Fetching user:', username);
+      console.log('Bearer token exists:', !!process.env.TWITTER_BEARER_TOKEN);
+      console.log('Bearer token length:', process.env.TWITTER_BEARER_TOKEN?.length);
+      
       const user = await this.readOnly.v2.userByUsername(username, {
         'user.fields': [
           'created_at',
@@ -23,9 +27,11 @@ class TwitterService {
           'verified_type'
         ]
       });
+      console.log('User response:', JSON.stringify(user));
       return user.data;
     } catch (error) {
-      console.error('Error fetching user:', error);
+      console.error('Error fetching user:', error.message);
+      console.error('Error data:', JSON.stringify(error.data || error));
       throw error;
     }
   }
