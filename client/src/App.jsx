@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Layout from './components/Layout'
 import Home from './pages/Home'
 import Analyze from './pages/Analyze'
@@ -10,6 +10,15 @@ import PfpStudio from './pages/PfpStudio'
 
 function App() {
   const [darkMode, setDarkMode] = useState(true)
+
+  // Apply dark class to html element for proper cascading
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [darkMode])
 
   return (
     <div className={darkMode ? 'dark' : ''}>
