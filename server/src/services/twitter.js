@@ -107,11 +107,114 @@ class TwitterService {
     }
   }
 
-  async getUserTweets(userId, maxResults = 50) {
-    // Tweet fetching via GraphQL would require additional endpoints
-    // For now, return empty - engagement will be estimated from profile metrics
-    console.log('Tweet fetching via GraphQL not implemented yet');
-    return [];
+  async getUserTweets(userId, maxResults = 5) {
+    console.log('Fetching tweets for user ID:', userId);
+    
+    try {
+      const guestToken = await this.getGuestToken();
+      
+      const variables = JSON.stringify({
+        userId: userId,
+        count: maxResults,
+        includePromotedContent: false,
+        withQuickPromoteEligibilityTweetFields: false,
+        withVoice: false,
+        withV2Timeline: true
+      });
+      
+      const features = JSON.stringify({
+        rweb_tipjar_consumption_enabled: true,
+        responsive_web_graphql_exclude_directive_enabled: true,
+        verified_phone_label_enabled: false,
+        creator_subscriptions_tweet_preview_api_enabled: true,
+        responsive_web_graphql_timeline_navigation_enabled: true,
+        responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+        communities_web_enable_tweet_community_results_fetch: true,
+        c9s_tweet_anatomy_moderator_badge_enabled: true,
+        articles_preview_enabled: true,
+        responsive_web_edit_tweet_api_enabled: true,
+        graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+        view_counts_everywhere_api_enabled: true,
+        longform_notetweets_consumption_enabled: true,
+        responsive_web_twitter_article_tweet_consumption_enabled: true,
+        tweet_awards_web_tipping_enabled: false,
+        creator_subscriptions_quote_tweet_preview_enabled: false,
+        freedom_of_speech_not_reach_fetch_enabled: true,
+        standardized_nudges_misinfo: true,
+        tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+        rweb_video_timestamps_enabled: true,
+        longform_notetweets_rich_text_read_enabled: true,
+        longform_notetweets_inline_media_enabled: true,
+        responsive_web_enhance_cards_enabled: false
+      });
+
+      const url = `https://twitter.com/i/api/graphql/V7H0Ap3_Hh2FyS75OCDO3Q/UserTweets?variables=${encodeURIComponent(variables)}&features=${encodeURIComponent(features)}`;
+
+      const response = await axios.get(url, {
+        headers: {
+          'Authorization': `Bearer ${this.bearerToken}`,
+          'x-guest-token': guestToken,
+          'x-twitter-active-user': 'yes',
+          'x-twitter-client-language': 'en',
+          'Content-Type': 'application/json'
+        },
+        timeout: 15000
+      });
+
+      const timeline = response.data?.data?.user?.result?.timeline_v2?.timeline?.instructions || [];
+      const tweets = [];
+      let pinnedTweet = null;
+
+      for (const instruction of timeline) {
+        // Check for pinned tweet
+        if (instruction.type === 'TimelinePinEntry') {
+          const pinned = instruction.entry?.content?.itemContent?.tweet_results?.result;
+          if (pinned?.legacy) {
+            pinnedTweet = this.parseTweet(pinned);
+          }
+        }
+        
+        // Get regular tweets
+        if (instruction.type === 'TimelineAddEntries') {
+          for (const entry of instruction.entries || []) {
+            const tweet = entry?.content?.itemContent?.tweet_results?.result;
+            if (tweet?.legacy && tweets.length < maxResults) {
+              tweets.push(this.parseTweet(tweet));
+            }
+          }
+        }
+      }
+
+      console.log(`Got ${tweets.length} tweets, pinned: ${pinnedTweet ? 'yes' : 'no'}`);
+      
+      return {
+        tweets,
+        pinnedTweet
+      };
+
+    } catch (error) {
+      console.error('Error fetching tweets:', error.message);
+      return { tweets: [], pinnedTweet: null };
+    }
+  }
+
+  parseTweet(tweetData) {
+    const legacy = tweetData.legacy || {};
+    return {
+      id: legacy.id_str,
+      text: legacy.full_text || legacy.text || '',
+      created_at: legacy.created_at,
+      metrics: {
+        likes: legacy.favorite_count || 0,
+        retweets: legacy.retweet_count || 0,
+        replies: legacy.reply_count || 0,
+        quotes: legacy.quote_count || 0,
+        views: tweetData.views?.count ? parseInt(tweetData.views.count) : null
+      },
+      is_retweet: !!legacy.retweeted_status_result,
+      is_reply: !!legacy.in_reply_to_status_id_str,
+      is_quote: !!legacy.quoted_status_id_str
+    };
   }
 
   async getFollowers(userId, maxResults = 100) {

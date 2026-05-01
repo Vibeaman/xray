@@ -10,6 +10,14 @@ class AnalyzerService {
     const userId = user.id;
     const metrics = user.public_metrics || { followers_count: 0, following_count: 0, tweet_count: 0, listed_count: 0, like_count: 0 };
 
+    // Fetch recent tweets + pinned tweet
+    let tweetData = { tweets: [], pinnedTweet: null };
+    try {
+      tweetData = await twitterService.getUserTweets(userId, 5);
+    } catch (err) {
+      console.error('Failed to fetch tweets:', err.message);
+    }
+
     // Calculate metrics
     const analysis = {
       user: {
@@ -30,6 +38,8 @@ class AnalyzerService {
         listed: metrics.listed_count,
         likes: metrics.like_count || 0
       },
+      recentTweets: tweetData.tweets,
+      pinnedTweet: tweetData.pinnedTweet,
       scores: this.calculateScores(user),
       engagement: this.estimateEngagement(user),
       accountAge: this.calculateAccountAge(user.created_at),
