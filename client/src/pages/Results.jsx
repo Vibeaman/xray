@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useSearchParams, Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { 
   ArrowLeft, Users, MapPin, BadgeCheck, Flame, Image, 
-  Share2, Download, ExternalLink, Loader2, AlertCircle, RefreshCw
+  Share2, Download, ExternalLink, Loader2, AlertCircle, RefreshCw, X, Camera
 } from 'lucide-react'
 import { API_URL } from '../config'
+import ShareCard from '../components/ShareCard'
+import html2canvas from 'html2canvas'
 
 export default function Results() {
   const { username } = useParams()
@@ -13,6 +15,9 @@ export default function Results() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [showShareCard, setShowShareCard] = useState(false)
+  const [downloading, setDownloading] = useState(false)
+  const shareCardRef = useRef(null)
 
   useEffect(() => {
     fetchAnalysis()
@@ -37,6 +42,59 @@ export default function Results() {
       setError('Failed to analyze. Please try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const downloadCard = async () => {
+    if (!shareCardRef.current) return
+    setDownloading(true)
+    
+    try {
+      const canvas = await html2canvas(shareCardRef.current, {
+        scale: 2,
+        backgroundColor: null,
+        useCORS: true,
+        allowTaint: true
+      })
+      
+      const link = document.createElement('a')
+      link.download = `cloutcheck-${data.user.username}.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } catch (err) {
+      console.error('Download failed:', err)
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  const copyToClipboard = async () => {
+    if (!shareCardRef.current) return
+    setDownloading(true)
+    
+    try {
+      const canvas = await html2canvas(shareCardRef.current, {
+        scale: 2,
+        backgroundColor: null,
+        useCORS: true,
+        allowTaint: true
+      })
+      
+      canvas.toBlob(async (blob) => {
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ])
+          alert('Card copied to clipboard!')
+        } catch (err) {
+          // Fallback: download instead
+          downloadCard()
+        }
+        setDownloading(false)
+      })
+    } catch (err) {
+      console.error('Copy failed:', err)
+      setDownloading(false)
     }
   }
 
@@ -256,16 +314,80 @@ export default function Results() {
 
             {/* Actions */}
             <div className="flex gap-4">
-              <motion.button className="flex-1 btn-secondary py-3 flex items-center justify-center gap-2" whileHover={{ scale: 1.02 }}>
-                <Share2 size={18} /> Share
+              <motion.button 
+                onClick={() => setShowShareCard(true)}
+                className="flex-1 btn-secondary py-3 flex items-center justify-center gap-2" 
+                whileHover={{ scale: 1.02 }}
+              >
+                <Camera size={18} /> Share Card
               </motion.button>
-              <motion.button className="flex-1 btn-primary py-3 flex items-center justify-center gap-2" whileHover={{ scale: 1.02 }}>
+              <motion.button 
+                onClick={() => setShowShareCard(true)}
+                className="flex-1 btn-primary py-3 flex items-center justify-center gap-2" 
+                whileHover={{ scale: 1.02 }}
+              >
                 <Download size={18} /> Download
               </motion.button>
             </div>
           </motion.div>
         </div>
       </div>
+
+      {/* Share Card Modal */}
+      <AnimatePresence>
+        {showShareCard && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowShareCard(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setShowShareCard(false)}
+                className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-all z-10"
+              >
+                <X size={18} />
+              </button>
+
+              {/* The Card */}
+              <ShareCard ref={shareCardRef} data={data} />
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={copyToClipboard}
+                  disabled={downloading}
+                  className="flex-1 bg-white/20 hover:bg-white/30 text-white py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2"
+                >
+                  {downloading ? <Loader2 size={18} className="animate-spin" /> : <Share2 size={18} />}
+                  Copy
+                </button>
+                <button
+                  onClick={downloadCard}
+                  disabled={downloading}
+                  className="flex-1 bg-white text-gray-800 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 hover:bg-white/90"
+                >
+                  {downloading ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+                  Save
+                </button>
+              </div>
+
+              <p className="text-center text-white/50 text-xs mt-3">
+                Screenshot or download to share!
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
