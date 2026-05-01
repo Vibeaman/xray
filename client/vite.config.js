@@ -8,14 +8,5 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist'
-  },
-  define: {
-    'process.env': {},
-    global: 'globalThis'
-  },
-  resolve: {
-    alias: {
-      buffer: 'buffer'
-    }
   }
 })
