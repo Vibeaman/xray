@@ -8,10 +8,15 @@ class AnalyzerService {
     if (!user) throw new Error('User not found');
 
     const userId = user.id;
-    const metrics = user.public_metrics;
+    const metrics = user.public_metrics || { followers_count: 0, following_count: 0, tweet_count: 0, listed_count: 0 };
 
-    // Fetch recent tweets for engagement analysis
-    const tweets = await twitterService.getUserTweets(userId, 50);
+    // Fetch recent tweets for engagement analysis (limited with scraping)
+    let tweets = [];
+    try {
+      tweets = await twitterService.getUserTweets(userId, 50);
+    } catch (e) {
+      console.log('Could not fetch tweets, using estimates');
+    }
 
     // Calculate metrics
     const analysis = {
