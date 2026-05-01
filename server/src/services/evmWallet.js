@@ -11,13 +11,22 @@ class EVMWalletService {
       arbitrum: process.env.ARBITRUM_RPC_URL || 'https://arb1.arbitrum.io/rpc'
     };
 
-    // Block explorer APIs
+    // Block explorer APIs (V2 where available)
     this.explorerApis = {
-      ethereum: 'https://api.etherscan.io/api',
-      bsc: 'https://api.bscscan.com/api',
-      base: 'https://api.basescan.org/api',
-      polygon: 'https://api.polygonscan.com/api',
-      arbitrum: 'https://api.arbiscan.io/api'
+      ethereum: 'https://api.etherscan.io/v2/api',
+      bsc: 'https://api.bscscan.com/v2/api',
+      base: 'https://api.basescan.org/v2/api',
+      polygon: 'https://api.polygonscan.com/v2/api',
+      arbitrum: 'https://api.arbiscan.io/v2/api'
+    };
+
+    // Chain IDs for V2 API
+    this.chainIds = {
+      ethereum: 1,
+      bsc: 56,
+      base: 8453,
+      polygon: 137,
+      arbitrum: 42161
     };
 
     // Native currency info
@@ -122,14 +131,20 @@ class EVMWalletService {
     try {
       const apiUrl = this.explorerApis[chain];
       const apiKey = this.getApiKey(chain);
+      const chainId = this.chainIds[chain];
       
-      // Note: Without API key, these have lower rate limits
-      const url = `${apiUrl}?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=100&sort=desc${apiKey ? `&apikey=${apiKey}` : ''}`;
+      // V2 API format with chainid
+      const url = `${apiUrl}?chainid=${chainId}&module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=100&sort=desc${apiKey ? `&apikey=${apiKey}` : ''}`;
+      
+      console.log(`Fetching txs for ${chain}:`, url.replace(apiKey || '', '[REDACTED]'));
       
       const response = await axios.get(url, { timeout: 15000 });
       
-      if (response.data.status !== '1' || !response.data.result) {
-        return { total: 0, recent: [], firstTx: null, lastTx: null };
+      console.log(`TX response (${chain}):`, response.data.status, response.data.message);
+      
+      if (response.data.status !== '1' || !response.data.result || !Array.isArray(response.data.result)) {
+        // Try fallback without chainid for backwards compat
+        return await this.getTransactionHistoryFallback(address, chain, apiKey);
       }
 
       const txs = response.data.result;
@@ -153,16 +168,70 @@ class EVMWalletService {
     }
   }
 
-  async getTokenBalances(address, chain) {
+  async getTransactionHistoryFallback(address, chain, apiKey) {
     try {
-      const apiUrl = this.explorerApis[chain];
-      const apiKey = this.getApiKey(chain);
+      // Fallback to V1 style URL
+      const v1Apis = {
+        ethereum: 'https://api.etherscan.io/api',
+        bsc: 'https://api.bscscan.com/api',
+        base: 'https://api.basescan.org/api',
+        polygon: 'https://api.polygonscan.com/api',
+        arbitrum: 'https://api.arbiscan.io/api'
+      };
       
-      const url = `${apiUrl}?module=account&action=tokentx&address=${address}&page=1&offset=100&sort=desc${apiKey ? `&apikey=${apiKey}` : ''}`;
+      const url = `${v1Apis[chain]}?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=100&sort=desc${apiKey ? `&apikey=${apiKey}` : ''}`;
       
       const response = await axios.get(url, { timeout: 15000 });
       
-      if (response.data.status !== '1' || !response.data.result) {
+      if (response.data.status !== '1' || !response.data.result || !Array.isArray(response.data.result)) {
+        return { total: 0, recent: [], firstTx: null, lastTx: null };
+      }
+
+      const txs = response.data.result;
+      
+      return {
+        total: txs.length,
+        recent: txs.slice(0, 10).map(tx => ({
+          hash: tx.hash,
+          timestamp: new Date(parseInt(tx.timeStamp) * 1000).toISOString(),
+          from: tx.from,
+          to: tx.to,
+          value: parseInt(tx.value) / 1e18,
+          status: tx.isError === '0' ? 'success' : 'failed'
+        })),
+        firstTx: txs.length > 0 ? parseInt(txs[txs.length - 1].timeStamp) : null,
+        lastTx: txs.length > 0 ? parseInt(txs[0].timeStamp) : null
+      };
+    } catch (error) {
+      console.error(`TX fallback error (${chain}):`, error.message);
+      return { total: 0, recent: [], firstTx: null, lastTx: null };
+    }
+  }
+
+  async getTokenBalances(address, chain) {
+    try {
+      const apiKey = this.getApiKey(chain);
+      const chainId = this.chainIds[chain];
+      
+      // Try V2 first
+      let url = `${this.explorerApis[chain]}?chainid=${chainId}&module=account&action=tokentx&address=${address}&page=1&offset=100&sort=desc${apiKey ? `&apikey=${apiKey}` : ''}`;
+      
+      let response = await axios.get(url, { timeout: 15000 });
+      
+      // Fallback to V1 if needed
+      if (response.data.status !== '1' || !response.data.result || !Array.isArray(response.data.result)) {
+        const v1Apis = {
+          ethereum: 'https://api.etherscan.io/api',
+          bsc: 'https://api.bscscan.com/api',
+          base: 'https://api.basescan.org/api',
+          polygon: 'https://api.polygonscan.com/api',
+          arbitrum: 'https://api.arbiscan.io/api'
+        };
+        url = `${v1Apis[chain]}?module=account&action=tokentx&address=${address}&page=1&offset=100&sort=desc${apiKey ? `&apikey=${apiKey}` : ''}`;
+        response = await axios.get(url, { timeout: 15000 });
+      }
+      
+      if (response.data.status !== '1' || !response.data.result || !Array.isArray(response.data.result)) {
         return [];
       }
 
@@ -191,14 +260,28 @@ class EVMWalletService {
 
   async getNFTs(address, chain) {
     try {
-      const apiUrl = this.explorerApis[chain];
       const apiKey = this.getApiKey(chain);
+      const chainId = this.chainIds[chain];
       
-      const url = `${apiUrl}?module=account&action=tokennfttx&address=${address}&page=1&offset=100&sort=desc${apiKey ? `&apikey=${apiKey}` : ''}`;
+      // Try V2 first
+      let url = `${this.explorerApis[chain]}?chainid=${chainId}&module=account&action=tokennfttx&address=${address}&page=1&offset=100&sort=desc${apiKey ? `&apikey=${apiKey}` : ''}`;
       
-      const response = await axios.get(url, { timeout: 15000 });
+      let response = await axios.get(url, { timeout: 15000 });
       
-      if (response.data.status !== '1' || !response.data.result) {
+      // Fallback to V1 if needed
+      if (response.data.status !== '1' || !response.data.result || !Array.isArray(response.data.result)) {
+        const v1Apis = {
+          ethereum: 'https://api.etherscan.io/api',
+          bsc: 'https://api.bscscan.com/api',
+          base: 'https://api.basescan.org/api',
+          polygon: 'https://api.polygonscan.com/api',
+          arbitrum: 'https://api.arbiscan.io/api'
+        };
+        url = `${v1Apis[chain]}?module=account&action=tokennfttx&address=${address}&page=1&offset=100&sort=desc${apiKey ? `&apikey=${apiKey}` : ''}`;
+        response = await axios.get(url, { timeout: 15000 });
+      }
+      
+      if (response.data.status !== '1' || !response.data.result || !Array.isArray(response.data.result)) {
         return [];
       }
 
