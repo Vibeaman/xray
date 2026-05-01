@@ -50,9 +50,17 @@ export default function Results() {
     try {
       const canvas = await html2canvas(cardRef.current, {
         scale: 2,
-        backgroundColor: null,
+        backgroundColor: '#ff7b5f',
         useCORS: true,
-        allowTaint: true
+        allowTaint: true,
+        logging: false,
+        imageTimeout: 15000,
+        onclone: (clonedDoc) => {
+          const clonedCard = clonedDoc.querySelector('[data-card]')
+          if (clonedCard) {
+            clonedCard.style.transform = 'none'
+          }
+        }
       })
       
       const link = document.createElement('a')
@@ -61,6 +69,7 @@ export default function Results() {
       link.click()
     } catch (err) {
       console.error('Download failed:', err)
+      alert('Download failed. Try taking a screenshot instead!')
     } finally {
       setDownloading(false)
     }
@@ -142,9 +151,10 @@ export default function Results() {
         ref={cardRef}
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md p-4 rounded-3xl"
+        style={{ backgroundColor: 'transparent' }}
       >
-        <div className="bg-white dark:bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div data-card className="bg-white rounded-3xl shadow-2xl overflow-hidden">
           {/* Top Section - Profile */}
           <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-50 dark:to-gray-100 pt-6 pb-4 px-6 text-center">
             {/* Avatar with Tier Badge */}
