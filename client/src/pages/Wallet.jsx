@@ -18,7 +18,6 @@ export default function Wallet() {
     setLoading(true)
     setError('')
 
-    // Navigate to results
     const chainParam = chain !== 'auto' ? `?chain=${chain}` : ''
     navigate(`/wallet/${address.trim()}${chainParam}`)
   }
@@ -33,82 +32,83 @@ export default function Wallet() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-20">
-      <div className="max-w-2xl w-full">
+    <div className="min-h-[80vh] flex items-center justify-center px-6 py-12">
+      <div className="max-w-xl w-full">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-10"
         >
           <motion.div
-            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-500/20 mb-6"
+            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 mb-6"
             animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            transition={{ duration: 3, repeat: Infinity }}
           >
-            <WalletIcon className="text-blue-400" size={40} />
+            <WalletIcon className="text-cyan-400" size={36} />
           </motion.div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Scan any <span className="gradient-text">wallet</span>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 font-['Orbitron']">
+            <span className="neon-text">SCAN WALLET</span>
           </h1>
-          <p className="text-xl text-gray-400">
-            Analyze holdings, activity, and get roasted across multiple chains
+          <p className="text-lg opacity-70">
+            Analyze holdings across multiple chains
           </p>
         </motion.div>
 
+        {/* Form */}
         <motion.form
           onSubmit={handleSubmit}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="glass-strong rounded-2xl p-8"
+          transition={{ delay: 0.2 }}
+          className="glass-card p-8"
         >
-          {/* Address Input */}
+          {/* Input */}
           <div className="relative mb-6">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-              <LinkIcon className="text-gray-500" size={20} />
+            <div className="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none">
+              <LinkIcon className="text-cyan-400" size={20} />
             </div>
             <input
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="Enter wallet address (0x... or Solana)"
-              className="w-full input-dark rounded-xl py-4 pl-12 pr-4 text-lg font-mono"
+              className="w-full input-neon py-4 pl-14 pr-4 text-lg font-mono"
               disabled={loading}
             />
           </div>
 
-          {/* Detected Chain */}
+          {/* Detected */}
           {address.length > 10 && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               className="mb-6 text-sm"
             >
-              <span className="text-gray-500">Detected: </span>
-              <span className="text-purple-400">{detectChain()}</span>
+              <span className="opacity-50">Detected: </span>
+              <span className="text-cyan-400">{detectChain()}</span>
             </motion.div>
           )}
 
-          {/* Chain Selection (for EVM) */}
+          {/* Chain Selection */}
           {isEVMAddress(address) && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               className="mb-6"
             >
-              <label className="block text-sm text-gray-400 mb-2">Select Chain</label>
+              <label className="block text-sm opacity-70 mb-2">Select Chain</label>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setChain('auto')}
                   className={`p-3 rounded-xl text-sm font-medium transition-all ${
                     chain === 'auto' 
-                      ? 'bg-purple-500/20 text-purple-400 ring-1 ring-purple-500' 
-                      : 'glass hover:bg-white/5'
+                      ? 'bg-pink-500/20 text-pink-400 ring-1 ring-pink-500' 
+                      : 'glass-card hover:bg-white/5'
                   }`}
                 >
-                  Auto-detect
+                  Auto
                 </button>
                 {Object.entries(CHAINS).filter(([key]) => key !== 'solana').map(([key, value]) => (
                   <button
@@ -117,8 +117,8 @@ export default function Wallet() {
                     onClick={() => setChain(key)}
                     className={`p-3 rounded-xl text-sm font-medium transition-all ${
                       chain === key 
-                        ? 'bg-purple-500/20 text-purple-400 ring-1 ring-purple-500' 
-                        : 'glass hover:bg-white/5'
+                        ? 'bg-pink-500/20 text-pink-400 ring-1 ring-pink-500' 
+                        : 'glass-card hover:bg-white/5'
                     }`}
                   >
                     {value.name}
@@ -140,10 +140,10 @@ export default function Wallet() {
             </motion.div>
           )}
 
-          {/* Submit Button */}
+          {/* Submit */}
           <motion.button
             type="submit"
-            className="w-full btn-primary py-4 rounded-xl font-semibold text-white text-lg flex items-center justify-center gap-2"
+            className="w-full btn-neon py-4 text-lg flex items-center justify-center gap-2"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             disabled={loading || !address.trim()}
@@ -163,13 +163,9 @@ export default function Wallet() {
 
           {/* Options */}
           <div className="flex items-center justify-center gap-6 mt-6">
-            <label className="flex items-center gap-2 text-gray-400 cursor-pointer">
-              <input type="checkbox" className="rounded border-gray-600 bg-dark-700 text-purple-500" defaultChecked />
+            <label className="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-all">
+              <input type="checkbox" className="rounded border-purple-500 bg-transparent text-pink-500" defaultChecked />
               <span className="text-sm">Include Roast</span>
-            </label>
-            <label className="flex items-center gap-2 text-gray-400 cursor-pointer">
-              <input type="checkbox" className="rounded border-gray-600 bg-dark-700 text-purple-500" />
-              <span className="text-sm">Multi-chain Scan</span>
             </label>
           </div>
         </motion.form>
@@ -181,17 +177,14 @@ export default function Wallet() {
           transition={{ delay: 0.4 }}
           className="mt-8 text-center"
         >
-          <p className="text-gray-500 text-sm mb-3">Supported chains</p>
+          <p className="text-sm opacity-50 mb-3">Supported chains</p>
           <div className="flex flex-wrap justify-center gap-2">
             {Object.entries(CHAINS).map(([key, value]) => (
               <div
                 key={key}
-                className="px-3 py-1 glass rounded-lg text-xs text-gray-400 flex items-center gap-2"
+                className="px-3 py-1 glass-card text-xs flex items-center gap-2"
               >
-                <div 
-                  className="w-2 h-2 rounded-full" 
-                  style={{ backgroundColor: value.color }}
-                />
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: value.color }} />
                 {value.name}
               </div>
             ))}

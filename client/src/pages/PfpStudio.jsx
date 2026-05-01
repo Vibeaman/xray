@@ -96,7 +96,7 @@ export default function PfpStudio() {
   }
 
   return (
-    <div className="min-h-screen px-4 py-24">
+    <div className="px-6 py-12">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
@@ -105,30 +105,30 @@ export default function PfpStudio() {
           className="text-center mb-12"
         >
           <motion.div
-            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-cyan-500/20 mb-6"
+            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 mb-6"
             animate={{ rotate: [0, 10, -10, 0] }}
-            transition={{ duration: 3, repeat: Infinity }}
+            transition={{ duration: 4, repeat: Infinity }}
           >
-            <Sparkles className="text-cyan-400" size={40} />
+            <Sparkles className="text-purple-400" size={36} />
           </motion.div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="gradient-text">PFP</span> Studio
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 font-['Orbitron']">
+            <span className="neon-text-pink">PFP</span> <span className="neon-text">STUDIO</span>
           </h1>
-          <p className="text-xl text-gray-400">
-            Transform your profile picture with filters, themes, and AI-generated lore
+          <p className="text-lg opacity-70">
+            Transform your profile picture with retro filters and AI lore
           </p>
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left - Preview */}
+          {/* Preview */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             className="space-y-6"
           >
             {/* Image Preview */}
-            <div className="glass-strong rounded-2xl p-6">
-              <div className="aspect-square rounded-xl overflow-hidden bg-dark-700 flex items-center justify-center relative">
+            <div className="glass-card p-6">
+              <div className="aspect-square rounded-xl overflow-hidden bg-gradient-to-br from-purple-500/10 to-pink-500/10 flex items-center justify-center relative">
                 {imageUrl ? (
                   <img
                     src={imageUrl}
@@ -137,104 +137,88 @@ export default function PfpStudio() {
                     style={{ filter: getActiveFilter() }}
                   />
                 ) : (
-                  <div className="text-center text-gray-500">
+                  <div className="text-center opacity-50">
                     <Upload size={48} className="mx-auto mb-4" />
-                    <p>Upload or paste image URL</p>
+                    <p>Upload or paste URL</p>
                   </div>
                 )}
                 
-                {/* Season overlay */}
                 {selectedSeason && (
                   <div 
                     className="absolute inset-0 pointer-events-none"
-                    style={{ 
-                      backgroundColor: seasons.find(s => s.id === selectedSeason)?.overlay || 'transparent'
-                    }}
+                    style={{ backgroundColor: seasons.find(s => s.id === selectedSeason)?.overlay || 'transparent' }}
                   />
                 )}
               </div>
 
-              {/* Upload Controls */}
+              {/* Upload */}
               <div className="mt-4 space-y-3">
-                <div className="flex gap-2">
-                  <label className="flex-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                    <div className="btn-secondary py-3 rounded-xl text-center cursor-pointer flex items-center justify-center gap-2">
-                      <Upload size={18} />
-                      Upload Image
-                    </div>
-                  </label>
-                </div>
+                <label className="block">
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  <div className="btn-outline py-3 text-center cursor-pointer flex items-center justify-center gap-2">
+                    <Upload size={18} />
+                    Upload Image
+                  </div>
+                </label>
                 <input
                   type="text"
                   placeholder="Or paste image URL..."
                   value={image ? '' : imageUrl}
                   onChange={handleUrlInput}
-                  className="w-full input-dark rounded-xl py-3 px-4 text-sm"
+                  className="w-full input-neon py-3 px-4 text-sm"
                 />
               </div>
             </div>
 
-            {/* Lore Generator */}
+            {/* Lore */}
             {imageUrl && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="glass-strong rounded-2xl p-6"
+                className="glass-card p-6"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <h3 className="font-semibold flex items-center gap-2 font-['Orbitron']">
                     <Wand2 className="text-purple-400" size={20} />
-                    Character Lore
+                    CHARACTER LORE
                   </h3>
                   <motion.button
                     onClick={generateLore}
                     disabled={loreLoading}
-                    className="btn-primary px-4 py-2 rounded-lg text-sm flex items-center gap-2"
+                    className="btn-neon px-4 py-2 text-sm flex items-center gap-2"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {loreLoading ? (
-                      <RefreshCw className="animate-spin" size={16} />
-                    ) : (
-                      <Sparkles size={16} />
-                    )}
+                    {loreLoading ? <RefreshCw className="animate-spin" size={16} /> : <Sparkles size={16} />}
                     Generate
                   </motion.button>
                 </div>
                 {lore ? (
-                  <p className="text-gray-300 italic leading-relaxed">"{lore}"</p>
+                  <p className="italic opacity-80">"{lore}"</p>
                 ) : (
-                  <p className="text-gray-500 text-sm">
-                    Click generate to create AI-powered lore for your character
-                  </p>
+                  <p className="text-sm opacity-50">Click generate to create AI-powered lore</p>
                 )}
               </motion.div>
             )}
           </motion.div>
 
-          {/* Right - Controls */}
+          {/* Controls */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
             className="space-y-6"
           >
-            {/* Style Filters */}
-            <div className="glass-strong rounded-2xl p-6">
-              <h3 className="text-lg font-semibold mb-4">Style Filters</h3>
+            {/* Styles */}
+            <div className="glass-card p-6">
+              <h3 className="font-semibold mb-4 font-['Orbitron']">STYLE FILTERS</h3>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => { setSelectedStyle(null); setSelectedSeason(null); }}
                   className={`p-3 rounded-xl text-sm transition-all ${
                     !selectedStyle && !selectedSeason
-                      ? 'bg-purple-500/20 text-purple-400 ring-1 ring-purple-500'
-                      : 'glass hover:bg-white/5'
+                      ? 'bg-pink-500/20 text-pink-400 ring-1 ring-pink-500'
+                      : 'glass-card hover:bg-white/5'
                   }`}
                 >
                   None
@@ -245,8 +229,8 @@ export default function PfpStudio() {
                     onClick={() => { setSelectedStyle(style.id); setSelectedSeason(null); }}
                     className={`p-3 rounded-xl text-sm transition-all ${
                       selectedStyle === style.id
-                        ? 'bg-purple-500/20 text-purple-400 ring-1 ring-purple-500'
-                        : 'glass hover:bg-white/5'
+                        ? 'bg-pink-500/20 text-pink-400 ring-1 ring-pink-500'
+                        : 'glass-card hover:bg-white/5'
                     }`}
                   >
                     {style.name}
@@ -255,9 +239,9 @@ export default function PfpStudio() {
               </div>
             </div>
 
-            {/* Seasonal Themes */}
-            <div className="glass-strong rounded-2xl p-6">
-              <h3 className="text-lg font-semibold mb-4">Seasonal Themes</h3>
+            {/* Seasons */}
+            <div className="glass-card p-6">
+              <h3 className="font-semibold mb-4 font-['Orbitron']">SEASONAL THEMES</h3>
               <div className="grid grid-cols-3 gap-3">
                 {seasons.map((season) => {
                   const Icon = seasonIcons[season.id] || Sparkles
@@ -267,8 +251,8 @@ export default function PfpStudio() {
                       onClick={() => { setSelectedSeason(season.id); setSelectedStyle(null); }}
                       className={`p-4 rounded-xl flex flex-col items-center gap-2 transition-all ${
                         selectedSeason === season.id
-                          ? 'bg-purple-500/20 text-purple-400 ring-1 ring-purple-500'
-                          : 'glass hover:bg-white/5'
+                          ? 'bg-cyan-500/20 text-cyan-400 ring-1 ring-cyan-500'
+                          : 'glass-card hover:bg-white/5'
                       }`}
                     >
                       <Icon size={24} />
@@ -282,7 +266,7 @@ export default function PfpStudio() {
             {/* Download */}
             {imageUrl && (
               <motion.button
-                className="w-full btn-primary py-4 rounded-xl font-semibold text-lg flex items-center justify-center gap-2"
+                className="w-full btn-neon py-4 text-lg flex items-center justify-center gap-2"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >

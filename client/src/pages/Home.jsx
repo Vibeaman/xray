@@ -1,240 +1,151 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Search, Wallet, Sparkles, Zap, Shield, TrendingUp, ChevronRight } from 'lucide-react'
+import { Search, Wallet, Sparkles, Zap } from 'lucide-react'
 
 export default function Home() {
   const features = [
     {
       icon: Search,
       title: 'Profile Analysis',
-      description: 'Deep dive into any Twitter/X account. Get scores, engagement metrics, and AI-powered insights.',
-      color: 'purple'
+      description: 'Deep dive into any Twitter/X account with AI-powered insights.',
+      color: 'cyan'
     },
     {
       icon: Wallet,
       title: 'Wallet Scanner',
-      description: 'Analyze any Solana or EVM wallet. Track holdings, activity, NFTs across multiple chains.',
-      color: 'blue'
+      description: 'Analyze Solana & EVM wallets across multiple chains.',
+      color: 'pink'
     },
     {
       icon: Sparkles,
       title: 'PFP Studio',
-      description: 'Transform your profile picture with filters, seasonal themes, and AI-generated lore.',
-      color: 'cyan'
+      description: 'Transform your profile picture with retro filters.',
+      color: 'purple'
     },
     {
       icon: Zap,
       title: 'Brutal Roasts',
-      description: 'Get absolutely destroyed by our AI. No mercy. Pure entertainment.',
-      color: 'pink'
+      description: 'Get absolutely destroyed by our AI. No mercy.',
+      color: 'orange'
     }
   ]
 
-  const stats = [
-    { value: '100K+', label: 'Profiles Analyzed' },
-    { value: '50K+', label: 'Wallets Scanned' },
-    { value: '∞', label: 'Dreams Crushed' }
-  ]
-
   return (
-    <div className="relative">
-      {/* Hero Section */}
-      <section className="min-h-screen flex items-center justify-center px-4 py-20">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left - Content */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
+    <div className="relative min-h-[80vh] flex flex-col items-center justify-center px-6 py-12">
+      {/* Neon Triangle */}
+      <div className="absolute left-1/4 top-1/2 -translate-y-1/2 -translate-x-1/2 hidden lg:block">
+        <motion.div
+          className="triangle-outline animate-glow"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1 }}
+        />
+      </div>
+
+      {/* Floating Detective Pepe */}
+      <motion.div
+        className="absolute left-[15%] top-1/2 -translate-y-1/2 hidden lg:block"
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+      >
+        <motion.img
+          src="/detective-pepe.png"
+          alt="Detective Pepe"
+          className="w-32 h-32 rounded-full ring-4 ring-cyan-500/50 object-cover"
+          animate={{ y: [0, -15, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </motion.div>
+
+      {/* Main Content */}
+      <div className="relative z-10 text-center max-w-4xl mx-auto">
+        {/* Main Title */}
+        <motion.h1
+          className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 font-['Orbitron'] tracking-wider"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <span className="neon-text">EXPOSE</span>
+          <br />
+          <span className="neon-text-pink">THE TRUTH</span>
+        </motion.h1>
+
+        {/* Subtitle */}
+        <motion.p
+          className="text-lg md:text-xl text-white/70 dark:text-white/70 mb-10 max-w-2xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          Analyze Twitter profiles and crypto wallets with AI-powered insights.
+          <br />
+          Get roasted. See the reality behind the flex.
+        </motion.p>
+
+        {/* CTA Buttons */}
+        <motion.div
+          className="flex flex-wrap justify-center gap-4 mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+        >
+          <Link to="/analyze">
+            <motion.button
+              className="btn-neon px-8 py-4 text-lg flex items-center gap-2"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
+              <Search size={20} />
+              Analyze Profile
+            </motion.button>
+          </Link>
+          <Link to="/wallet">
+            <motion.button
+              className="btn-outline px-8 py-4 text-lg flex items-center gap-2"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Wallet size={20} />
+              Scan Wallet
+            </motion.button>
+          </Link>
+        </motion.div>
+
+        {/* Features Grid */}
+        <motion.div
+          className="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+        >
+          {features.map((feature, index) => {
+            const Icon = feature.icon
+            const colorClasses = {
+              cyan: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
+              pink: 'text-pink-400 bg-pink-500/10 border-pink-500/30',
+              purple: 'text-purple-400 bg-purple-500/10 border-purple-500/30',
+              orange: 'text-orange-400 bg-orange-500/10 border-orange-500/30'
+            }
+            return (
               <motion.div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6"
+                key={feature.title}
+                className={`glass-card p-6 retro-card border ${colorClasses[feature.color].split(' ').slice(1).join(' ')}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
+                transition={{ delay: 0.7 + index * 0.1 }}
               >
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-sm text-gray-400">Now with multi-chain wallet support</span>
+                <div className={`w-12 h-12 rounded-xl ${colorClasses[feature.color].split(' ').slice(1, 2).join(' ')} flex items-center justify-center mb-4`}>
+                  <Icon className={colorClasses[feature.color].split(' ')[0]} size={24} />
+                </div>
+                <h3 className="font-semibold mb-2">{feature.title}</h3>
+                <p className="text-sm opacity-70">{feature.description}</p>
               </motion.div>
-
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                <span className="gradient-text">Expose</span> the truth
-                <br />
-                behind every
-                <br />
-                <span className="gradient-text-fire">profile</span>
-              </h1>
-
-              <p className="text-xl text-gray-400 mb-8 max-w-lg">
-                Analyze Twitter accounts and crypto wallets with AI-powered insights. 
-                Get roasted. See the reality behind the flex.
-              </p>
-
-              <div className="flex flex-wrap gap-4">
-                <Link to="/analyze">
-                  <motion.button
-                    className="btn-primary px-8 py-4 rounded-xl font-semibold text-white text-lg flex items-center gap-2"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Search size={20} />
-                    Analyze Profile
-                  </motion.button>
-                </Link>
-                <Link to="/wallet">
-                  <motion.button
-                    className="btn-secondary px-8 py-4 rounded-xl font-semibold text-white text-lg flex items-center gap-2"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Wallet size={20} />
-                    Scan Wallet
-                  </motion.button>
-                </Link>
-              </div>
-
-              {/* Stats */}
-              <div className="flex gap-8 mt-12">
-                {stats.map((stat, index) => (
-                  <motion.div
-                    key={stat.label}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 + index * 0.1 }}
-                  >
-                    <div className="text-3xl font-bold gradient-text">{stat.value}</div>
-                    <div className="text-sm text-gray-500">{stat.label}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Right - Detective Pepe */}
-            <motion.div
-              className="relative flex justify-center"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              {/* Glow behind */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse-soft" />
-              </div>
-              
-              {/* Detective Pepe */}
-              <motion.img
-                src="/detective-pepe.png"
-                alt="Detective Pepe"
-                className="relative z-10 w-full max-w-md drop-shadow-2xl"
-                animate={{ y: [0, -15, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              />
-
-              {/* Floating badges */}
-              <motion.div
-                className="absolute top-10 right-10 glass rounded-xl px-4 py-2"
-                animate={{ y: [0, -10, 0], rotate: [0, 5, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <span className="text-2xl">🔍</span>
-              </motion.div>
-
-              <motion.div
-                className="absolute bottom-20 left-0 glass rounded-xl px-4 py-2"
-                animate={{ y: [0, -10, 0], rotate: [0, -5, 0] }}
-                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-              >
-                <span className="text-2xl">💀</span>
-              </motion.div>
-
-              <motion.div
-                className="absolute top-1/2 right-0 glass rounded-xl px-4 py-2"
-                animate={{ y: [0, -10, 0], rotate: [0, 3, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              >
-                <span className="text-2xl">🔥</span>
-              </motion.div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Everything you need to <span className="gradient-text">investigate</span>
-            </h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              From profile analysis to wallet scanning, we've got the tools to expose anyone.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => {
-              const Icon = feature.icon
-              return (
-                <motion.div
-                  key={feature.title}
-                  className="glass-strong rounded-2xl p-6 card-3d"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <div className={`w-12 h-12 rounded-xl bg-${feature.color}-500/20 flex items-center justify-center mb-4`}>
-                    <Icon className={`text-${feature.color}-400`} size={24} />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-gray-400">{feature.description}</p>
-                </motion.div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            className="glass-strong rounded-3xl p-12 text-center relative overflow-hidden"
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-          >
-            {/* Background gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-transparent to-blue-500/10" />
-            
-            <div className="relative z-10">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                Ready to get <span className="gradient-text-fire">roasted</span>?
-              </h2>
-              <p className="text-xl text-gray-400 mb-8 max-w-xl mx-auto">
-                Enter any Twitter username or wallet address. 
-                Our AI will analyze and absolutely destroy them.
-              </p>
-              <Link to="/analyze">
-                <motion.button
-                  className="btn-primary px-8 py-4 rounded-xl font-semibold text-white text-lg inline-flex items-center gap-2"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Start Now
-                  <ChevronRight size={20} />
-                </motion.button>
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+            )
+          })}
+        </motion.div>
+      </div>
     </div>
   )
 }
