@@ -10,12 +10,15 @@ class AnalyzerService {
     const userId = user.id;
     const metrics = user.public_metrics || { followers_count: 0, following_count: 0, tweet_count: 0, listed_count: 0, like_count: 0 };
 
-    // Fetch recent tweets + pinned tweet
-    let tweetData = { tweets: [], pinnedTweet: null };
-    try {
-      tweetData = await twitterService.getUserTweets(userId, 5);
-    } catch (err) {
-      console.error('Failed to fetch tweets:', err.message);
+    // Fetch pinned tweet directly by ID (more reliable than timeline scraping)
+    let pinnedTweet = null;
+    if (user.pinned_tweet_id) {
+      try {
+        pinnedTweet = await twitterService.getTweetById(user.pinned_tweet_id);
+        console.log('Pinned tweet fetched:', pinnedTweet ? 'yes' : 'no');
+      } catch (err) {
+        console.error('Failed to fetch pinned tweet:', err.message);
+      }
     }
 
     // Calculate metrics
@@ -38,8 +41,7 @@ class AnalyzerService {
         listed: metrics.listed_count,
         likes: metrics.like_count || 0
       },
-      recentTweets: tweetData.tweets,
-      pinnedTweet: tweetData.pinnedTweet,
+      pinnedTweet: pinnedTweet,
       scores: this.calculateScores(user),
       engagement: this.estimateEngagement(user),
       accountAge: this.calculateAccountAge(user.created_at),

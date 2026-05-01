@@ -86,6 +86,7 @@ class TwitterService {
         verified_type: userData.is_blue_verified ? 'blue' : (legacy.verified ? 'legacy' : null),
         created_at: legacy.created_at ? new Date(legacy.created_at).toISOString() : null,
         location: legacy.location || null,
+        pinned_tweet_id: legacy.pinned_tweet_ids_str?.[0] || null,
         public_metrics: {
           followers_count: legacy.followers_count || 0,
           following_count: legacy.friends_count || 0,
@@ -104,6 +105,99 @@ class TwitterService {
       }
       
       throw error;
+    }
+  }
+
+  async getTweetById(tweetId) {
+    console.log('Fetching tweet by ID:', tweetId);
+    
+    if (!tweetId) return null;
+    
+    try {
+      const guestToken = await this.getGuestToken();
+      
+      const variables = JSON.stringify({
+        tweetId: tweetId,
+        withCommunity: false,
+        includePromotedContent: false,
+        withVoice: false
+      });
+      
+      const features = JSON.stringify({
+        creator_subscriptions_tweet_preview_api_enabled: true,
+        communities_web_enable_tweet_community_results_fetch: true,
+        c9s_tweet_anatomy_moderator_badge_enabled: true,
+        articles_preview_enabled: true,
+        responsive_web_edit_tweet_api_enabled: true,
+        graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+        view_counts_everywhere_api_enabled: true,
+        longform_notetweets_consumption_enabled: true,
+        responsive_web_twitter_article_tweet_consumption_enabled: true,
+        tweet_awards_web_tipping_enabled: false,
+        creator_subscriptions_quote_tweet_preview_enabled: false,
+        freedom_of_speech_not_reach_fetch_enabled: true,
+        standardized_nudges_misinfo: true,
+        tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+        rweb_video_timestamps_enabled: true,
+        longform_notetweets_rich_text_read_enabled: true,
+        longform_notetweets_inline_media_enabled: true,
+        rweb_tipjar_consumption_enabled: true,
+        responsive_web_graphql_exclude_directive_enabled: true,
+        verified_phone_label_enabled: false,
+        responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+        responsive_web_graphql_timeline_navigation_enabled: true,
+        responsive_web_enhance_cards_enabled: false
+      });
+
+      const url = `https://twitter.com/i/api/graphql/xOhkmRac04YFZmOzU9PJHg/TweetDetail?variables=${encodeURIComponent(variables)}&features=${encodeURIComponent(features)}`;
+      
+      const response = await axios.get(url, {
+        headers: {
+          'Authorization': `Bearer ${this.bearerToken}`,
+          'x-guest-token': guestToken,
+          'x-twitter-active-user': 'yes',
+          'x-twitter-client-language': 'en',
+          'Content-Type': 'application/json'
+        },
+        timeout: 15000
+      });
+
+      // Navigate the response to find the tweet
+      const instructions = response.data?.data?.tweetResult?.result || 
+                          response.data?.data?.threaded_conversation_with_injections_v2?.instructions || [];
+      
+      let tweetData = null;
+      
+      // If direct result
+      if (response.data?.data?.tweetResult?.result?.legacy) {
+        tweetData = response.data.data.tweetResult.result;
+      } else {
+        // Search in instructions
+        for (const instruction of instructions) {
+          if (instruction.type === 'TimelineAddEntries') {
+            for (const entry of instruction.entries || []) {
+              const content = entry?.content?.itemContent?.tweet_results?.result;
+              if (content?.legacy?.id_str === tweetId || content?.rest_id === tweetId) {
+                tweetData = content;
+                break;
+              }
+            }
+          }
+          if (tweetData) break;
+        }
+      }
+      
+      if (!tweetData?.legacy) {
+        console.log('Tweet not found in response');
+        return null;
+      }
+      
+      console.log('Got pinned tweet:', tweetData.legacy.full_text?.slice(0, 50));
+      return this.parseTweet(tweetData);
+      
+    } catch (error) {
+      console.error('Error fetching tweet:', error.message);
+      return null;
     }
   }
 

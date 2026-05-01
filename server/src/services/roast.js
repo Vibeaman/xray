@@ -16,19 +16,14 @@ class RoastService {
   }
   
   async generateRoast(analysis) {
-    const { user, metrics, scores, tier, engagement, pinnedTweet, recentTweets } = analysis;
+    const { user, metrics, scores, tier, engagement, pinnedTweet } = analysis;
 
-    // Build tweet context
+    // Build pinned tweet context
     let tweetContext = '';
     if (pinnedTweet) {
-      tweetContext += `\nPINNED TWEET: "${pinnedTweet.text.slice(0, 280)}" (${pinnedTweet.metrics.likes} likes, ${pinnedTweet.metrics.retweets} RTs)`;
-    }
-    if (recentTweets && recentTweets.length > 0) {
-      tweetContext += '\nRECENT TWEETS:';
-      recentTweets.slice(0, 3).forEach((tweet, i) => {
-        const type = tweet.is_retweet ? '[RT]' : tweet.is_reply ? '[REPLY]' : tweet.is_quote ? '[QT]' : '';
-        tweetContext += `\n${i + 1}. ${type} "${tweet.text.slice(0, 200)}..." (${tweet.metrics.likes} likes)`;
-      });
+      tweetContext = `\n\nPINNED TWEET (what they chose to showcase):\n"${pinnedTweet.text.slice(0, 400)}"\nEngagement: ${pinnedTweet.metrics.likes} likes, ${pinnedTweet.metrics.retweets} RTs`;
+    } else {
+      tweetContext = '\n\nPINNED TWEET: None (no pinned tweet - not showcasing any work)';
     }
 
     const prompt = `You are CloutCheck -- the ultimate detector of REAL BUILDERS vs CLOUT CHASERS on Crypto Twitter.
