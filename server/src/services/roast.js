@@ -70,22 +70,26 @@ No generic roasts. Focus ONLY on the builder vs clout question.`;
   }
 
   async ratePfp(pfpUrl, username) {
-    const prompt = `You're a SAVAGE roast judge with ZERO chill. Rate this Twitter/X profile picture and absolutely DESTROY them.
+    const prompt = `You're a witty profile picture analyst. Analyze this Twitter/X profile picture and give your honest, funny take.
 
-Look at this profile picture and give:
-1. A rating out of 10 (be harsh)
-2. A BRUTAL roast about the PFP (2-3 sentences of pure destruction)
-3. What vibe/energy the PFP gives off (be toxic about it)
+Look at this profile picture and provide:
+1. A rating out of 10 (be honest but fair)
+2. A clever, witty commentary about what this PFP says about them (2-3 sentences, be funny and observational)
+3. What vibe/energy the PFP gives off
 
 Username: @${username}
-PFP URL: ${pfpUrl}
 
-No mercy. Anime pfp? Roast them for being maidenless. NFT? They're broke now. Default egg? They don't exist. Professional headshot? LinkedIn reject. Cat/dog pic? Too scared to show their face. GO OFF.
+Be playful and entertaining. Examples:
+- Anime PFP: "Probably has strong opinions about subs vs dubs"
+- NFT/Ape: "Either made it or lost it all, no in between"
+- Professional headshot: "LinkedIn energy in a Twitter world"
+- Cat/dog pic: "Their pet is more interesting than them and they know it"
+- Cartoon/illustration: "Committed to the brand"
 
 Format your response as:
 Rating: X/10
-Roast: [your brutal roast]
-Vibe: [the toxic vibe check]`;
+Roast: [your witty take]
+Vibe: [the vibe check]`;
 
     try {
       const response = await this.getClient().chat.completions.create({
