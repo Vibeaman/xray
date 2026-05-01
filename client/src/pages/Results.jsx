@@ -167,9 +167,9 @@ export default function Results() {
             transition={{ delay: 0.1 }}
             className="lg:col-span-2 space-y-6"
           >
-            {/* Score */}
+            {/* Clout Score */}
             <div className="solid-card p-6">
-              <h3 className="font-bold font-display mb-6">Score</h3>
+              <h3 className="font-bold font-display mb-6">Clout Score</h3>
               <div className="flex items-center gap-8">
                 {/* Circle */}
                 <div className="relative w-24 h-24 score-circle">

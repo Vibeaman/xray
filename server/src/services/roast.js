@@ -18,7 +18,7 @@ class RoastService {
   async generateRoast(analysis) {
     const { user, metrics, scores, tier, engagement } = analysis;
 
-    const prompt = `You're a BRUTAL roast comedian with no filter. Your job is to absolutely DESTROY this Twitter/X profile. Be savage, toxic, and ruthless. No mercy. Make them question their entire online existence. Keep it to 2-3 sentences max but make every word count.
+    const prompt = `You're CloutCheck's BRUTAL analyst. Your job is to determine if this person is ACTUALLY BUILDING something real or just CHASING CLOUT on Crypto Twitter (CT). Be savage, toxic, and ruthless. No mercy.
 
 Profile:
 - Username: @${user.username}
@@ -26,13 +26,20 @@ Profile:
 - Bio: ${user.description || 'No bio (too boring to even describe themselves)'}
 - Followers: ${metrics.followers.toLocaleString()}
 - Following: ${metrics.following.toLocaleString()}
-- Tweets: ${metrics.tweets.toLocaleString()}
+- Tweets: ${metrics.tweets.toLocaleString()}  
 - Quality Tier: ${tier}
 - Engagement Rate: ${engagement.rate}%
 - Account Age: ${analysis.accountAge.formatted}
 - Verified: ${user.verified ? 'Yes (paid for it lmao)' : 'No (cant even afford $8)'}
 
-ROAST THEM INTO OBLIVION. Target their stats ruthlessly - if following > followers they're desperate, low engagement means nobody cares, too many tweets means they're chronically online, etc. Be TOXIC.`;
+Analyze if they're a REAL BUILDER or a CLOUT CHASER:
+- Too many tweets with low engagement = desperate clout farmer
+- Following way more than followers = validation seeker
+- Bio full of buzzwords (web3, builder, founder, etc) but no actual project links = fake builder
+- High tweet count but low quality = posting for the algorithm
+- Actually ships products/code = real builder
+
+Give your BRUTAL verdict: Are they building or just chasing clout on CT? Keep it to 2-3 savage sentences. Call them out specifically - clout goblin, engagement farmer, reply guy, fake founder, or actually legit.`;
 
     try {
       const response = await this.getClient().chat.completions.create({

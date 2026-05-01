@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Search, Wallet, ArrowRight } from 'lucide-react'
 import FloatingIcons from '../components/FloatingIcons'
+import { APP_NAME, APP_TAGLINE } from '../config'
 
 export default function Home() {
   return (
@@ -18,8 +19,8 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           className="mb-8"
         >
-          <h1 className="text-7xl md:text-9xl font-bold font-display tracking-tight mb-4">
-            <span className="gradient-text">XRAY</span>
+          <h1 className="text-6xl md:text-8xl font-bold font-display tracking-tight mb-4">
+            <span className="gradient-text">{APP_NAME}</span>
           </h1>
           <motion.div 
             className="h-1 w-32 mx-auto rounded-full bg-gradient-to-r from-transparent via-current to-transparent opacity-30"
@@ -36,9 +37,9 @@ export default function Home() {
           transition={{ delay: 0.3, duration: 0.8 }}
           className="text-xl md:text-2xl mb-12 opacity-80 max-w-2xl mx-auto leading-relaxed"
         >
-          Expose the truth behind every profile.
+          {APP_TAGLINE}
           <br />
-          <span className="opacity-60">Analyze accounts. Scan wallets. Get roasted.</span>
+          <span className="opacity-60">Expose the clout chasers. Find the real builders.</span>
         </motion.p>
 
         {/* CTA Buttons */}

@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Search, Wallet, Sparkles, Twitter, Github } from 'lucide-react'
-import { CREDITS } from '../config'
+import { CREDITS, APP_NAME } from '../config'
 
 export default function Layout({ children, darkMode, setDarkMode }) {
   const location = useLocation()
@@ -24,7 +24,7 @@ export default function Layout({ children, darkMode, setDarkMode }) {
                 className="text-2xl font-bold font-display gradient-text"
                 whileHover={{ scale: 1.05 }}
               >
-                XRAY
+                {APP_NAME}
               </motion.span>
             </Link>
 
@@ -148,7 +148,7 @@ export default function Layout({ children, darkMode, setDarkMode }) {
             </div>
 
             <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm opacity-50">
-              © 2026 XRay. Expose the truth behind every profile. 🔍
+              © 2026 CloutCheck. Are they building or just chasing clout? 🔍
             </div>
           </div>
         </div>

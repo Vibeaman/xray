@@ -1,5 +1,8 @@
 // API Configuration
-export const API_URL = import.meta.env.VITE_API_URL || 'https://xray-production-72a7.up.railway.app';
+export const API_URL = import.meta.env.VITE_API_URL || 'https://xray-production-72a7.up.railway.app'
+
+export const APP_NAME = 'CloutCheck'
+export const APP_TAGLINE = 'Are they building or just chasing clout?';
 
 // Social links
 export const SOCIAL_LINKS = {
