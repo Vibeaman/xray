@@ -53,7 +53,7 @@ export default function Analyze() {
         >
           {/* Input */}
           <div className="relative mb-6">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-5 z-10 pointer-events-none">
               <AtSign size={20} className="opacity-40" />
             </div>
             <input
@@ -61,7 +61,8 @@ export default function Analyze() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="username"
-              className="input-field pl-12 text-lg"
+              className="input-field text-lg"
+              style={{ paddingLeft: '52px' }}
               disabled={loading}
             />
           </div>

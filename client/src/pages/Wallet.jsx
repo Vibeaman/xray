@@ -62,7 +62,7 @@ export default function Wallet() {
         >
           {/* Input */}
           <div className="relative mb-4">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-5 z-10 pointer-events-none">
               <LinkIcon size={20} className="opacity-40" />
             </div>
             <input
@@ -70,7 +70,8 @@ export default function Wallet() {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="0x... or Solana address"
-              className="input-field pl-12 text-lg font-mono"
+              className="input-field text-lg font-mono"
+              style={{ paddingLeft: '52px' }}
               disabled={loading}
             />
           </div>
