@@ -56,21 +56,21 @@ REAL BUILDER green flags:
 - Talks about building, shows progress, ships stuff
 - Has receipts -- actual work, not just talk
 
-Write 2 SHORT sentences (max 150 characters total). DO NOT start with "VERDICT:" or any label.
+Write a UNIQUE verdict specifically about @${user.username}. Reference SPECIFIC details from their profile:
+- Mention something from their bio or pinned tweet
+- Reference their actual stats (${metrics.followers.toLocaleString()} followers, ${metrics.tweets.toLocaleString()} tweets)
+- Be specific about what they're building OR what makes them a clout chaser
 
-Examples:
-- "@username is building. Pinned tweet shows a real project - respect."
-- "@username is chasing clout. Bio buzzwords but zero shipped products."
-- "Classic engagement farmer. All takes, no receipts."
-
-Be direct and brief. Max 150 characters.`;
+Keep it to 2 sentences max. DO NOT start with "VERDICT:".
+DO NOT use generic phrases like "lacks evidence of building" without specifics.
+MUST mention @${user.username} or their name "${user.name}" in the response.`;
 
     try {
       const response = await this.getClient().chat.completions.create({
         model: 'openai/gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 80,
-        temperature: 0.9
+        max_tokens: 120,
+        temperature: 1.0
       });
 
       return response.choices[0].message.content.trim();
