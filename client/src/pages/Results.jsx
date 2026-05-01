@@ -216,7 +216,7 @@ export default function Results() {
               </div>
             </div>
 
-            {/* Roast */}
+            {/* Verdict */}
             {data.roast && (
               <motion.div
                 className="solid-card p-6 border-l-4 border-orange-500"
@@ -226,9 +226,9 @@ export default function Results() {
               >
                 <div className="flex items-center gap-2 mb-3">
                   <Flame size={20} className="text-orange-500" />
-                  <h3 className="font-bold font-display">The Roast</h3>
+                  <h3 className="font-bold font-display">The Verdict</h3>
                 </div>
-                <p className="text-lg leading-relaxed italic opacity-80">"{data.roast}"</p>
+                <p className="text-lg leading-relaxed opacity-90">{data.roast}</p>
               </motion.div>
             )}
 

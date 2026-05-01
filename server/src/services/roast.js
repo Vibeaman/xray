@@ -18,28 +18,41 @@ class RoastService {
   async generateRoast(analysis) {
     const { user, metrics, scores, tier, engagement } = analysis;
 
-    const prompt = `You're CloutCheck's BRUTAL analyst. Your job is to determine if this person is ACTUALLY BUILDING something real or just CHASING CLOUT on Crypto Twitter (CT). Be savage, toxic, and ruthless. No mercy.
+    const prompt = `You are CloutCheck -- the ultimate detector of REAL BUILDERS vs CLOUT CHASERS on Crypto Twitter.
+
+Your ONLY job: Determine if this person is BUILDING REAL VALUE or just CHASING CLOUT.
 
 Profile:
 - Username: @${user.username}
 - Name: ${user.name}
-- Bio: ${user.description || 'No bio (too boring to even describe themselves)'}
+- Bio: ${user.description || 'Empty bio'}
 - Followers: ${metrics.followers.toLocaleString()}
 - Following: ${metrics.following.toLocaleString()}
-- Tweets: ${metrics.tweets.toLocaleString()}  
-- Quality Tier: ${tier}
-- Engagement Rate: ${engagement.rate}%
+- Tweets: ${metrics.tweets.toLocaleString()}
 - Account Age: ${analysis.accountAge.formatted}
-- Verified: ${user.verified ? 'Yes (paid for it lmao)' : 'No (cant even afford $8)'}
+- Verified: ${user.verified ? 'Yes' : 'No'}
 
-Analyze if they're a REAL BUILDER or a CLOUT CHASER:
-- Too many tweets with low engagement = desperate clout farmer
-- Following way more than followers = validation seeker
-- Bio full of buzzwords (web3, builder, founder, etc) but no actual project links = fake builder
-- High tweet count but low quality = posting for the algorithm
-- Actually ships products/code = real builder
+CLOUT CHASER red flags:
+- Bio stuffed with buzzwords ("builder", "founder", "web3", "based") but no actual project links
+- High tweet count but no evidence of shipping anything
+- Follows way more people than follow them (desperate for validation)
+- Lots of threads and takes but zero products
+- Just retweets alpha and adds "this" or fire emojis
+- Reply guy energy -- always in replies, never creating
 
-Give your BRUTAL verdict: Are they building or just chasing clout on CT? Keep it to 2-3 savage sentences. Call them out specifically - clout goblin, engagement farmer, reply guy, fake founder, or actually legit.`;
+REAL BUILDER green flags:
+- Bio links to actual projects, github, or products they built
+- Lower tweet count but focused content
+- People follow THEM, they don't chase follows
+- Talks about building, shows progress, ships stuff
+- Has receipts -- actual work, not just talk
+
+Give your VERDICT in 2-3 sentences:
+1. State clearly: Are they BUILDING VALUE or CHASING CLOUT?
+2. Explain WHY based on the evidence
+3. Be direct and savage -- call them a clout goblin, engagement farmer, reply guy, thread boy, fake founder OR give them respect if they're actually building
+
+No generic roasts. Focus ONLY on the builder vs clout question.`;
 
     try {
       const response = await this.getClient().chat.completions.create({
