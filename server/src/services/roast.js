@@ -56,20 +56,20 @@ REAL BUILDER green flags:
 - Talks about building, shows progress, ships stuff
 - Has receipts -- actual work, not just talk
 
-Write 2-3 sentences about this person. DO NOT start with "VERDICT:" or any label -- just go straight into the analysis.
+Write 2 SHORT sentences (max 150 characters total). DO NOT start with "VERDICT:" or any label.
 
-Examples of good responses:
-- "@username is actually building. Their pinned tweet showcases a real project and they're shipping, not just talking."
-- "@username is chasing clout. Bio full of buzzwords but zero evidence of actual work. Classic engagement farmer."
-- "Respect to @username -- they've got receipts. Real project, real progress, not just CT noise."
+Examples:
+- "@username is building. Pinned tweet shows a real project - respect."
+- "@username is chasing clout. Bio buzzwords but zero shipped products."
+- "Classic engagement farmer. All takes, no receipts."
 
-Be direct. Call them a clout goblin, engagement farmer, reply guy, or give them props if they're legit. No hedging.`;
+Be direct and brief. Max 150 characters.`;
 
     try {
       const response = await this.getClient().chat.completions.create({
         model: 'openai/gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 150,
+        max_tokens: 80,
         temperature: 0.9
       });
 

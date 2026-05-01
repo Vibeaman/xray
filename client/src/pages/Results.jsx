@@ -146,29 +146,29 @@ export default function Results() {
       >
         <div className="bg-white dark:bg-white rounded-3xl shadow-2xl overflow-hidden">
           {/* Top Section - Profile */}
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-50 dark:to-gray-100 pt-8 pb-6 px-6 text-center">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-50 dark:to-gray-100 pt-6 pb-4 px-6 text-center">
             {/* Avatar with Tier Badge */}
-            <div className="relative inline-block mb-4">
+            <div className="relative inline-block mb-3">
               {data.user.profileImage ? (
                 <img
                   src={data.user.profileImage}
                   alt={data.user.name}
-                  className="w-28 h-28 rounded-2xl shadow-lg object-cover"
+                  className="w-20 h-20 rounded-2xl shadow-lg object-cover"
                 />
               ) : (
-                <div className="w-28 h-28 rounded-2xl bg-gray-200 flex items-center justify-center text-4xl font-bold text-gray-400">
+                <div className="w-20 h-20 rounded-2xl bg-gray-200 flex items-center justify-center text-3xl font-bold text-gray-400">
                   {data.user.name?.charAt(0) || '?'}
                 </div>
               )}
-              <div className={`absolute -bottom-2 -right-2 w-10 h-10 rounded-xl ${tierColors[data.tier]} flex items-center justify-center text-white text-lg font-bold shadow-lg`}>
+              <div className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-lg ${tierColors[data.tier]} flex items-center justify-center text-white text-sm font-bold shadow-lg`}>
                 {data.tier}
               </div>
             </div>
 
             {/* Name */}
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <h1 className="text-2xl font-bold text-gray-800">{data.user.name}</h1>
-              {data.user.verified && <BadgeCheck size={20} className="text-blue-500" />}
+            <div className="flex items-center justify-center gap-2">
+              <h1 className="text-xl font-bold text-gray-800">{data.user.name}</h1>
+              {data.user.verified && <BadgeCheck size={18} className="text-blue-500" />}
             </div>
             
             {/* Handle */}
@@ -183,38 +183,38 @@ export default function Results() {
           </div>
 
           {/* Clout Score Section */}
-          <div className="px-6 py-6 border-t border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-gray-800">Clout Score</h2>
-              <span className="text-xs text-gray-400">estimated from public metrics</span>
+          <div className="px-5 py-4 border-t border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-bold text-gray-800 text-sm">Clout Score</h2>
+              <span className="text-[10px] text-gray-400">estimated from public metrics</span>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
               {/* Score Circle */}
-              <div className="relative w-20 h-20 flex-shrink-0">
-                <svg className="w-20 h-20 -rotate-90">
-                  <circle cx="40" cy="40" r="34" strokeWidth="6" fill="none" stroke="#f3f4f6" />
+              <div className="relative w-16 h-16 flex-shrink-0">
+                <svg className="w-16 h-16 -rotate-90">
+                  <circle cx="32" cy="32" r="26" strokeWidth="5" fill="none" stroke="#f3f4f6" />
                   <circle
-                    cx="40" cy="40" r="34"
-                    strokeWidth="6"
+                    cx="32" cy="32" r="26"
+                    strokeWidth="5"
                     fill="none"
                     strokeLinecap="round"
-                    strokeDasharray="213.6"
-                    strokeDashoffset={213.6 - (213.6 * data.overallScore) / 100}
+                    strokeDasharray="163.4"
+                    strokeDashoffset={163.4 - (163.4 * data.overallScore) / 100}
                     stroke="#ff6b6b"
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-gray-800">{data.overallScore}</span>
+                  <span className="text-xl font-bold text-gray-800">{data.overallScore}</span>
                 </div>
               </div>
 
               {/* Score Bars */}
-              <div className="flex-1 space-y-2">
+              <div className="flex-1 space-y-1.5">
                 {Object.entries(data.scores).map(([key, value]) => (
-                  <div key={key} className="flex items-center gap-3">
-                    <span className="text-sm text-gray-500 capitalize w-20">{key}</span>
-                    <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
+                  <div key={key} className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500 capitalize w-16">{key}</span>
+                    <div className="flex-1 h-1.5 rounded-full bg-gray-100 overflow-hidden">
                       <motion.div
                         className="h-full rounded-full bg-gradient-to-r from-orange-400 to-red-400"
                         initial={{ width: 0 }}
@@ -222,7 +222,7 @@ export default function Results() {
                         transition={{ duration: 0.8, delay: 0.2 }}
                       />
                     </div>
-                    <span className="text-sm font-medium text-gray-700 w-8 text-right">{value}</span>
+                    <span className="text-xs font-medium text-gray-700 w-6 text-right">{value}</span>
                   </div>
                 ))}
               </div>
@@ -231,19 +231,19 @@ export default function Results() {
 
           {/* Verdict Section */}
           {data.roast && (
-            <div className="px-6 pb-6">
-              <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Flame size={18} className="text-orange-500" />
-                  <span className="font-bold text-gray-800">The Verdict</span>
+            <div className="px-5 pb-4">
+              <div className="bg-orange-50 border border-orange-100 rounded-xl p-3">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <Flame size={14} className="text-orange-500" />
+                  <span className="font-bold text-gray-800 text-sm">The Verdict</span>
                 </div>
-                <p className="text-gray-700 leading-relaxed">{data.roast}</p>
+                <p className="text-gray-700 text-sm leading-snug">{data.roast}</p>
               </div>
             </div>
           )}
 
           {/* Footer Branding */}
-          <div className="px-6 pb-4 flex items-center justify-between text-xs text-gray-400">
+          <div className="px-5 pb-3 flex items-center justify-between text-[10px] text-gray-400">
             <span className="font-semibold">CloutCheck</span>
             <span>cloutcheck.app</span>
           </div>
