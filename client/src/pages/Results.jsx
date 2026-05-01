@@ -169,7 +169,10 @@ export default function Results() {
           >
             {/* Clout Score */}
             <div className="solid-card p-6">
-              <h3 className="font-bold font-display mb-6">Clout Score</h3>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-bold font-display">Clout Score</h3>
+                <span className="text-xs opacity-40 bg-white/10 px-2 py-1 rounded">estimated from public metrics</span>
+              </div>
               <div className="flex items-center gap-8">
                 {/* Circle */}
                 <div className="relative w-24 h-24 score-circle">
