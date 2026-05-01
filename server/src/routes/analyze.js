@@ -7,7 +7,7 @@ const roastService = require('../services/roast');
 router.get('/:username', async (req, res) => {
   try {
     const { username } = req.params;
-    const { roast } = req.query;
+    const { roast, pfpRating } = req.query;
 
     // Clean username (remove @ if present)
     const cleanUsername = username.replace(/^@/, '');
@@ -18,6 +18,14 @@ router.get('/:username', async (req, res) => {
     // Generate roast if requested
     if (roast === 'true') {
       analysis.roast = await roastService.generateRoast(analysis);
+    }
+
+    // Rate PFP if requested
+    if (pfpRating === 'true' && analysis.user.profileImage) {
+      analysis.pfpRating = await roastService.ratePfp(
+        analysis.user.profileImage,
+        analysis.user.username
+      );
     }
 
     res.json(analysis);
