@@ -24,7 +24,7 @@ const ShareCard = forwardRef(({ data }, ref) => {
     <div 
       ref={ref}
       className="w-[400px] bg-gradient-to-br from-[#ff6b6b] via-[#ff8e53] to-[#ffb347] p-5 rounded-2xl shadow-2xl"
-      style={{ fontFamily: "'Poppins', sans-serif" }}
+      style={{ fontFamily: "'Poppins', sans-serif", minHeight: 'auto' }}
     >
       {/* Header with PFP and Info */}
       <div className="flex items-center gap-4 mb-4">
@@ -86,8 +86,7 @@ const ShareCard = forwardRef(({ data }, ref) => {
           <span className="font-bold text-gray-800 text-sm">The Verdict</span>
         </div>
         <p className="text-gray-700 text-sm leading-relaxed">
-          {data.roast?.slice(0, 280) || 'No verdict available'}
-          {data.roast?.length > 280 && '...'}
+          {data.roast || 'No verdict available'}
         </p>
       </div>
 
