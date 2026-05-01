@@ -1,12 +1,19 @@
 const OpenAI = require('openai');
 
-// Using OpenRouter as the provider
-const openai = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY,
-  baseURL: 'https://openrouter.ai/api/v1'
-});
-
 class RoastService {
+  constructor() {
+    this.client = null;
+  }
+
+  getClient() {
+    if (!this.client) {
+      this.client = new OpenAI({
+        apiKey: process.env.OPENROUTER_API_KEY,
+        baseURL: 'https://openrouter.ai/api/v1'
+      });
+    }
+    return this.client;
+  }
   
   async generateRoast(analysis) {
     const { user, metrics, scores, tier, engagement } = analysis;
@@ -28,7 +35,7 @@ Profile:
 Generate a funny roast about this profile. Reference specific stats if they're funny (like if following > followers, or low engagement, or too many tweets, etc).`;
 
     try {
-      const response = await openai.chat.completions.create({
+      const response = await this.getClient().chat.completions.create({
         model: 'openai/gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 150,
@@ -50,7 +57,7 @@ PFP Description: ${pfpDescription}
 Write the character's lore:`;
 
     try {
-      const response = await openai.chat.completions.create({
+      const response = await this.getClient().chat.completions.create({
         model: 'openai/gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 200,
