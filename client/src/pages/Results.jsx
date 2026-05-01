@@ -2,11 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  ArrowLeft, Users, MapPin, BadgeCheck, Flame, Image, 
-  Share2, Download, ExternalLink, Loader2, AlertCircle, RefreshCw, X, Camera
+  ArrowLeft, BadgeCheck, Flame, 
+  Share2, Download, ExternalLink, Loader2, AlertCircle, RefreshCw, X
 } from 'lucide-react'
 import { API_URL } from '../config'
-import ShareCard from '../components/ShareCard'
 import html2canvas from 'html2canvas'
 
 export default function Results() {
@@ -15,9 +14,8 @@ export default function Results() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [showShareCard, setShowShareCard] = useState(false)
   const [downloading, setDownloading] = useState(false)
-  const shareCardRef = useRef(null)
+  const cardRef = useRef(null)
 
   useEffect(() => {
     fetchAnalysis()
@@ -46,11 +44,11 @@ export default function Results() {
   }
 
   const downloadCard = async () => {
-    if (!shareCardRef.current) return
+    if (!cardRef.current) return
     setDownloading(true)
     
     try {
-      const canvas = await html2canvas(shareCardRef.current, {
+      const canvas = await html2canvas(cardRef.current, {
         scale: 2,
         backgroundColor: null,
         useCORS: true,
@@ -68,33 +66,21 @@ export default function Results() {
     }
   }
 
-  const copyToClipboard = async () => {
-    if (!shareCardRef.current) return
-    setDownloading(true)
-    
-    try {
-      const canvas = await html2canvas(shareCardRef.current, {
-        scale: 2,
-        backgroundColor: null,
-        useCORS: true,
-        allowTaint: true
-      })
-      
-      canvas.toBlob(async (blob) => {
-        try {
-          await navigator.clipboard.write([
-            new ClipboardItem({ 'image/png': blob })
-          ])
-          alert('Card copied to clipboard!')
-        } catch (err) {
-          // Fallback: download instead
-          downloadCard()
-        }
-        setDownloading(false)
-      })
-    } catch (err) {
-      console.error('Copy failed:', err)
-      setDownloading(false)
+  const shareCard = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `CloutCheck - @${data.user.username}`,
+          text: `Check out @${data.user.username}'s CloutCheck score!`,
+          url: window.location.href
+        })
+      } catch (err) {
+        // User cancelled or error
+      }
+    } else {
+      // Fallback: copy link
+      navigator.clipboard.writeText(window.location.href)
+      alert('Link copied!')
     }
   }
 
@@ -132,262 +118,172 @@ export default function Results() {
   }
 
   const tierColors = {
-    S: 'tier-s', A: 'tier-a', B: 'tier-b', C: 'tier-c', D: 'tier-d', F: 'tier-f'
+    S: 'bg-gradient-to-r from-yellow-400 to-amber-500',
+    A: 'bg-gradient-to-r from-purple-500 to-violet-600',
+    B: 'bg-gradient-to-r from-blue-500 to-blue-600',
+    C: 'bg-gradient-to-r from-green-500 to-emerald-600',
+    D: 'bg-gradient-to-r from-orange-500 to-orange-600',
+    F: 'bg-gradient-to-r from-red-500 to-red-600'
   }
 
   return (
-    <div className="px-6 py-8">
-      <div className="max-w-5xl mx-auto">
-        {/* Back */}
+    <div className="min-h-[85vh] flex flex-col items-center justify-center px-4 py-8">
+      {/* Back Button */}
+      <div className="w-full max-w-md mb-6">
         <Link to="/analyze">
-          <motion.button className="flex items-center gap-2 opacity-60 hover:opacity-100 mb-8" whileHover={{ x: -5 }}>
+          <motion.button className="flex items-center gap-2 opacity-60 hover:opacity-100" whileHover={{ x: -5 }}>
             <ArrowLeft size={20} /> Back
           </motion.button>
         </Link>
-
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Profile Card */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-1"
-          >
-            <div className="solid-card p-6 text-center">
-              {/* Avatar */}
-              <div className="relative inline-block mb-4">
-                {data.user.profileImage ? (
-                  <img
-                    src={data.user.profileImage}
-                    alt={data.user.name}
-                    className="w-24 h-24 rounded-2xl shadow-lg"
-                  />
-                ) : (
-                  <div className="w-24 h-24 rounded-2xl bg-white/20 flex items-center justify-center">
-                    <Users size={36} className="opacity-40" />
-                  </div>
-                )}
-                <div className={`absolute -bottom-2 -right-2 tier-badge text-sm ${tierColors[data.tier]}`}>
-                  {data.tier}
-                </div>
-              </div>
-
-              {/* Name */}
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <h2 className="text-xl font-bold">{data.user.name}</h2>
-                {data.user.verified && <BadgeCheck size={18} className="text-blue-400" />}
-              </div>
-              <a
-                href={`https://x.com/${data.user.username}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm opacity-60 hover:opacity-100 flex items-center justify-center gap-1"
-              >
-                @{data.user.username} <ExternalLink size={12} />
-              </a>
-
-              {/* Bio */}
-              {data.user.description && (
-                <p className="text-sm opacity-60 mt-4 leading-relaxed">{data.user.description}</p>
-              )}
-
-              {/* Stats */}
-              <div className="grid grid-cols-2 gap-3 mt-6">
-                <div className="bg-white/10 dark:bg-white/5 rounded-xl p-3">
-                  <div className="text-lg font-bold">{data.metrics.followers.toLocaleString()}</div>
-                  <div className="text-xs opacity-50">Followers</div>
-                </div>
-                <div className="bg-white/10 dark:bg-white/5 rounded-xl p-3">
-                  <div className="text-lg font-bold">{data.metrics.following.toLocaleString()}</div>
-                  <div className="text-xs opacity-50">Following</div>
-                </div>
-                <div className="bg-white/10 dark:bg-white/5 rounded-xl p-3">
-                  <div className="text-lg font-bold">{data.metrics.tweets.toLocaleString()}</div>
-                  <div className="text-xs opacity-50">Tweets</div>
-                </div>
-                <div className="bg-white/10 dark:bg-white/5 rounded-xl p-3">
-                  <div className="text-lg font-bold">{data.accountAge.formatted}</div>
-                  <div className="text-xs opacity-50">Age</div>
-                </div>
-              </div>
-
-              {data.user.location && (
-                <div className="flex items-center justify-center gap-2 mt-4 text-sm opacity-50">
-                  <MapPin size={14} /> {data.user.location}
-                </div>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Right Column */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="lg:col-span-2 space-y-6"
-          >
-            {/* Clout Score */}
-            <div className="solid-card p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold font-display">Clout Score</h3>
-                <span className="text-xs opacity-40 bg-white/10 px-2 py-1 rounded">estimated from public metrics</span>
-              </div>
-              <div className="flex items-center gap-8">
-                {/* Circle */}
-                <div className="relative w-24 h-24 score-circle">
-                  <svg className="w-24 h-24 -rotate-90">
-                    <circle cx="48" cy="48" r="40" strokeWidth="8" fill="none" className="stroke-current opacity-10" />
-                    <circle
-                      cx="48" cy="48" r="40"
-                      strokeWidth="8"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeDasharray="251"
-                      strokeDashoffset={251 - (251 * data.overallScore) / 100}
-                      className="stroke-current transition-all duration-1000"
-                      style={{ stroke: '#ff6b6b' }}
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-2xl font-bold font-display">{data.overallScore}</span>
-                  </div>
-                </div>
-
-                {/* Bars */}
-                <div className="flex-1 space-y-3">
-                  {Object.entries(data.scores).map(([key, value]) => (
-                    <div key={key}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="capitalize opacity-60">{key}</span>
-                        <span className="font-medium">{value}</span>
-                      </div>
-                      <div className="h-2 rounded-full overflow-hidden bg-black/10 dark:bg-white/10">
-                        <motion.div
-                          className="h-full rounded-full bg-gradient-to-r from-orange-400 to-red-400"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${value}%` }}
-                          transition={{ duration: 0.8, delay: 0.3 }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Verdict */}
-            {data.roast && (
-              <motion.div
-                className="solid-card p-6 border-l-4 border-orange-500"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <Flame size={20} className="text-orange-500" />
-                  <h3 className="font-bold font-display">The Verdict</h3>
-                </div>
-                <p className="text-lg leading-relaxed opacity-90">{data.roast}</p>
-              </motion.div>
-            )}
-
-            {/* PFP Rating */}
-            {data.pfpRating && (
-              <motion.div
-                className="solid-card p-6"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <Image size={20} className="text-purple-500" />
-                  <h3 className="font-bold font-display">PFP Rating</h3>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="text-3xl font-bold font-display text-purple-500">{data.pfpRating.rating}/10</div>
-                  <div className="flex-1">
-                    <p className="opacity-70 mb-1">{data.pfpRating.roast}</p>
-                    <p className="text-sm opacity-50">Vibe: {data.pfpRating.vibe}</p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Actions */}
-            <div className="flex gap-4">
-              <motion.button 
-                onClick={() => setShowShareCard(true)}
-                className="flex-1 btn-secondary py-3 flex items-center justify-center gap-2" 
-                whileHover={{ scale: 1.02 }}
-              >
-                <Camera size={18} /> Share Card
-              </motion.button>
-              <motion.button 
-                onClick={() => setShowShareCard(true)}
-                className="flex-1 btn-primary py-3 flex items-center justify-center gap-2" 
-                whileHover={{ scale: 1.02 }}
-              >
-                <Download size={18} /> Download
-              </motion.button>
-            </div>
-          </motion.div>
-        </div>
       </div>
 
-      {/* Share Card Modal */}
-      <AnimatePresence>
-        {showShareCard && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowShareCard(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative"
-              onClick={e => e.stopPropagation()}
+      {/* ID Card */}
+      <motion.div
+        ref={cardRef}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md"
+      >
+        <div className="bg-white dark:bg-white rounded-3xl shadow-2xl overflow-hidden">
+          {/* Top Section - Profile */}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-50 dark:to-gray-100 pt-8 pb-6 px-6 text-center">
+            {/* Avatar with Tier Badge */}
+            <div className="relative inline-block mb-4">
+              {data.user.profileImage ? (
+                <img
+                  src={data.user.profileImage}
+                  alt={data.user.name}
+                  className="w-28 h-28 rounded-2xl shadow-lg object-cover"
+                />
+              ) : (
+                <div className="w-28 h-28 rounded-2xl bg-gray-200 flex items-center justify-center text-4xl font-bold text-gray-400">
+                  {data.user.name?.charAt(0) || '?'}
+                </div>
+              )}
+              <div className={`absolute -bottom-2 -right-2 w-10 h-10 rounded-xl ${tierColors[data.tier]} flex items-center justify-center text-white text-lg font-bold shadow-lg`}>
+                {data.tier}
+              </div>
+            </div>
+
+            {/* Name */}
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <h1 className="text-2xl font-bold text-gray-800">{data.user.name}</h1>
+              {data.user.verified && <BadgeCheck size={20} className="text-blue-500" />}
+            </div>
+            
+            {/* Handle */}
+            <a
+              href={`https://x.com/${data.user.username}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors"
             >
-              {/* Close Button */}
-              <button
-                onClick={() => setShowShareCard(false)}
-                className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-all z-10"
-              >
-                <X size={18} />
-              </button>
+              @{data.user.username} <ExternalLink size={12} />
+            </a>
+          </div>
 
-              {/* The Card */}
-              <ShareCard ref={shareCardRef} data={data} />
+          {/* Clout Score Section */}
+          <div className="px-6 py-6 border-t border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-gray-800">Clout Score</h2>
+              <span className="text-xs text-gray-400">estimated from public metrics</span>
+            </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-3 mt-4">
-                <button
-                  onClick={copyToClipboard}
-                  disabled={downloading}
-                  className="flex-1 bg-white/20 hover:bg-white/30 text-white py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2"
-                >
-                  {downloading ? <Loader2 size={18} className="animate-spin" /> : <Share2 size={18} />}
-                  Copy
-                </button>
-                <button
-                  onClick={downloadCard}
-                  disabled={downloading}
-                  className="flex-1 bg-white text-gray-800 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 hover:bg-white/90"
-                >
-                  {downloading ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-                  Save
-                </button>
+            <div className="flex items-center gap-6">
+              {/* Score Circle */}
+              <div className="relative w-20 h-20 flex-shrink-0">
+                <svg className="w-20 h-20 -rotate-90">
+                  <circle cx="40" cy="40" r="34" strokeWidth="6" fill="none" stroke="#f3f4f6" />
+                  <circle
+                    cx="40" cy="40" r="34"
+                    strokeWidth="6"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeDasharray="213.6"
+                    strokeDashoffset={213.6 - (213.6 * data.overallScore) / 100}
+                    stroke="#ff6b6b"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-2xl font-bold text-gray-800">{data.overallScore}</span>
+                </div>
               </div>
 
-              <p className="text-center text-white/50 text-xs mt-3">
-                Screenshot or download to share!
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              {/* Score Bars */}
+              <div className="flex-1 space-y-2">
+                {Object.entries(data.scores).map(([key, value]) => (
+                  <div key={key} className="flex items-center gap-3">
+                    <span className="text-sm text-gray-500 capitalize w-20">{key}</span>
+                    <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
+                      <motion.div
+                        className="h-full rounded-full bg-gradient-to-r from-orange-400 to-red-400"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${value}%` }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 w-8 text-right">{value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Verdict Section */}
+          {data.roast && (
+            <div className="px-6 pb-6">
+              <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Flame size={18} className="text-orange-500" />
+                  <span className="font-bold text-gray-800">The Verdict</span>
+                </div>
+                <p className="text-gray-700 leading-relaxed">{data.roast}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Footer Branding */}
+          <div className="px-6 pb-4 flex items-center justify-between text-xs text-gray-400">
+            <span className="font-semibold">CloutCheck</span>
+            <span>cloutcheck.app</span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Action Buttons */}
+      <motion.div 
+        className="w-full max-w-md mt-6 flex gap-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
+        <button
+          onClick={shareCard}
+          className="flex-1 btn-secondary py-3 flex items-center justify-center gap-2"
+        >
+          <Share2 size={18} /> Share
+        </button>
+        <button
+          onClick={downloadCard}
+          disabled={downloading}
+          className="flex-1 btn-primary py-3 flex items-center justify-center gap-2"
+        >
+          {downloading ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+          Download
+        </button>
+      </motion.div>
+
+      {/* Analyze Another */}
+      <motion.div
+        className="mt-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        <Link to="/analyze" className="text-sm opacity-50 hover:opacity-80 transition-opacity">
+          Analyze another profile →
+        </Link>
+      </motion.div>
     </div>
   )
 }
